@@ -1,0 +1,43 @@
+# Node
+node_modules/
+npm-debug.log*
+# Logs
+logs/
+*.log
+latest.log
+# Backups and worlds
+backups/
+tsM_backups/
+tsmMcServer/world/
+tsmMcServer/world_nether/
+tsmMcServer/world_the_end/
+# Temporary
+tmp/
+*.tmp
+# OS
+.DS_Store
+# Editors
+.vscode/
+.idea/
+# Java/Maven
+target/
+*.class
+# Ignore plugin and server jars (built binaries)
+*.jar
+tsmMcServer/playit-linux-*
+tsmMcServer/paper-*.jar
+# Plugins folder jars
+tsmMcServer/plugins/*.jar
+# Configs and secrets
+config.json
+*.secret
+*.pem
+*.key
+.env
+# Bot queue
+tsmWhitelistBot/queue.json
+# Renderer build artifacts
+tsmManagement/renderer/tsm-renderer
+# Misc
+.sass-cache/
+*.swp
