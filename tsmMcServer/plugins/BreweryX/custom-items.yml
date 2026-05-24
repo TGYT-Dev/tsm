@@ -1,0 +1,38 @@
+# !!! IMPORTANT: BreweryX configuration files do NOT support external comments! If you add any comments, they will be overwritten !!!
+# -- Define custom items --
+# The defined id can then be used in recipes
+
+# matchAny: true if it is already enough if one of the info matches
+# material: Which type the item has to be
+# name: Which name the item has to be (Formatting codes possible: such as &6 or hex as &#<hex>)
+# lore: What has to be in the lore of the item
+# customModelData: Custom Model Data Int. Whatever Model data number the item has to have in a list format
+customItems:
+  ex-item:
+    material: Barrier
+    name: Wall
+    lore:
+    - '&7Very well protected'
+  ex-item2:
+    matchAny: true
+    material:
+    - Acacia_Door
+    - Oak_Door
+    - Spruce_Door
+    name:
+    - Beechwood Door
+    lore:
+    - A door
+  rasp:
+    name: '&cRaspberry'
+  modelitem:
+    material: paper
+    customModelData:
+    - 10234
+    - 30334
+  blue-flowers:
+    matchAny: true
+    material:
+    - cornflower
+    - blue_orchid
+

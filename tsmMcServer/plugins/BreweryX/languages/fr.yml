@@ -1,0 +1,222 @@
+# !!! IMPORTANT: BreweryX configuration files do NOT support external comments! If you add any comments, they will be overwritten !!!
+# Translations for BreweryX
+
+# Brew
+Brew_Alc: Alc &v1ml
+Brew_Alcoholic: Alcoholic
+Brew_BadPotion: Potion ruinée
+Brew_BarrelRiped: Vieilli en baril
+Brew_Brewer: 'Brasseur: &v1'
+Brew_DistillUndefined: Distillation indéfinie
+Brew_Distilled: Distillé
+Brew_fermented: fermenté
+Brew_HundredsOfYears: Centaines d´années
+Brew_Ingredients: Ingrédients
+Brew_LessDistilled: Moins distillé
+Brew_minute: minute
+Brew_MinutePluralPostfix: s
+Brew_OneYear: Un an
+Brew_times: -fois
+Brew_ThickBrew: Breuvage boueux
+Brew_Undefined: Breuvage indéfini
+Brew_Woodtype: Type de bois
+Brew_Years: Années
+
+# Brew Defects
+Defect_BadAged:
+- This brew shouldn't have been aged...
+Defect_BadDistill:
+- The brew evaporated...
+- The flavor disappeared...
+Defect_HighCount:
+- One of the ingredients is overpowering...
+- The flavor of one of the ingredients is too strong...
+Defect_LowCount:
+- You can barely taste one of the ingredients...
+- The flavor of one of the ingredients is too weak...
+Defect_MissingIngredient:
+- Seems like something's missing...
+- Needs something more...
+Defect_NeedsDistill:
+- This needs some distillation...
+Defect_NeedsDistillAlc:
+- You can't taste the alcohol...
+Defect_NoRecipesRegistered:
+- This universe doesn't support brewing...
+Defect_OverAged:
+- This brew smells expired...
+- This brew is ancient...
+Defect_OverAgedAlc:
+- This brew smells like vinegar...
+- This brew is ancient...
+Defect_Overcooked:
+- It's burnt...
+- Too much time in the oven...
+Defect_UnderAged:
+- This needs fermentation...
+- The brew tastes too harsh...
+Defect_Uncooked:
+- It's still raw...
+- Not enough time in the oven...
+Defect_WrongIngredient:
+- There's something in here that shouldn't be in here...
+- One of the ingredients doesn't taste good...
+Defect_WrongWood:
+- Tastes too much like &v1...
+- The &v1 is overpowering...
+
+# CMD
+CMD_Aged: '&aAged brew for &v1 years'
+CMD_Configname: '&aLe nom pour le fichier config est : &f&v1'
+CMD_Configname_Error: '&cN’a pas pu trouver d’objet dans votre main'
+CMD_Copy_Error: '&6&v1 &cCes potions ne rentrent pas dans votre inventaire.'
+CMD_Created: '&aBrew créé'
+CMD_Cannot_Distill: '&cThose ingredients cannot be distilled'
+CMD_Distill_Ruined: '&eThe brew was ruined in the distillation process'
+CMD_Distilled: '&aDistilled brew &v1 times'
+CMD_Drink: '&aVous avez bu un &v1'
+CMD_DrinkOther: '&a&v1 a bu un &v2'
+CMD_Duplicate_Option: '&cDuplicate option "&v1"'
+CMD_Info_Drunk: '&v1 est &6&v2% &fivre, avec une qualité de &6&v3'
+CMD_Info_NotDrunk: '&v1 nest pas ivre'
+CMD_Ingredient: ingredient
+CMD_Invalid_Age_Time: '&cAge time "&v1" must be a positive number'
+CMD_Invalid_Cook_Time: '&cCook time "&v1" must be a non-negative integer'
+CMD_Invalid_Distill_Runs: '&cDistill runs "&v1" must be a positive integer'
+CMD_Invalid_Ingredient: '&c"&v1" is not a valid ingredient, did you mean "&v2/&v1"?'
+CMD_Invalid_Option: '&c"&v1" is not a valid option'
+CMD_Invalid_Wood_Type: '&cInvalid barrel type "&v1"'
+CMD_Missing_Cook_Time: '&cSimulation must have a "--cook" or "--recipe" option'
+CMD_Missing_Ingredients: '&cSimulation must have at least one ingredient'
+CMD_NonStatic: '&eLa boisson n’est plus statique et vieillira normalement dans les
+  barils.'
+CMD_Player: '&a&v1 est maintenant &6&v2% &aivre, avec une qualité de &6&v3'
+CMD_Player_Error: '&cLa qualité doit être comprise entre 1 et 10 !'
+CMD_Reload: '&aLe fichier config a été reload avec succès.'
+CMD_Set: '&aL’ivresse de &v1 a été définie avec succès à &v2 avec une qualité de &v3.'
+CMD_Simulated: '&aSimulated Brew Created'
+CMD_Static: '&aLa boisson est maintenant statique et ne changera pas dans les barils
+  ou les stands d’alchimie.'
+CMD_UnLabel: '&Étiquette supprimé!'
+CMD_Age_Ruined: '&eThe brew was ruined in the aging process'
+
+# Error
+Error_AlreadyUnlabeled: '&cLe label est déjà supprimé !'
+Error_ConfigUpdate: 'La version de la configuration de Brewery est inconnue: v&v1,
+  la config n’a pas été mise à jour !'
+Error_InvalidAmount: '&cInvalid amount: &v1'
+Error_InvalidMaterial: '&cCould not find material: &v1'
+Error_InvalidPluginItem: '&cCould not find plugin item: &v1'
+Error_ItemNotPotion: '&cL’item dans votre main n’a pas pu être identifié comme une
+  potion !'
+Error_MissingBarrelType: '&cInvalid BarrelType'
+Error_NoBarrelAccess: '&cVous n’avez pas la permission d’acceder à ce baril !'
+Error_NoBrewName: '&cAucune recette avec le nom: &v1&c n’a été trouvée!'
+Error_NoPermissions: '&cVous ne pouvez pas faire ça !'
+Error_NoPlayer: '&cLe joueur n’a pas été trouvé : &v1'
+Error_PlayerCommand: '&cCette commande ne peut être executée que par un joueur !'
+Error_Recipeload: '&cToutes les recettes n´ont pu être restaurées: Plus d´informations
+  dans les logs du serveur !'
+Error_SealedAlwaysStatic: Les boissons scellées sont toujours statiques !
+Error_SealingTableDisabled: '&cLa table de scellage est désactivée'
+Error_ShowHelp: Utilisez &6/brew help &fpour trouver de l’aide
+Error_UnknownCommand: Commande inconnue
+Error_YmlRead: Ne peux pas lire le fichier config.yml, assurez-vous que le fichier
+  est à la bonne format (bonnes espaces, utilisant ' ' etc.)
+
+# Etc
+Etc_Barrel: Baril
+Etc_LandsFlag_Description: '&r&7Permet d’ouvrir\n&r&7les tonneaux de BreweryX.'
+Etc_LandsFlag_Title: Accès aux tonneaux
+Etc_NewRelease: '&rMise à jour disponible ! &2&v1 &r-> &2&v2&r Téléchargez&7 : &2&v3'
+Etc_Page: Page
+Etc_SealingTable: Table de scellage des boissons
+Etc_Usage: 'Utilise :'
+
+# Help
+Help_Age: '&6/brew age <Barrel Type> <Time> &9Ages the potion in your hand'
+Help_Configname: '&6/brew ItemName &9Le nom visible de l’objet à la main pour la configuration'
+Help_Copy: '&6/brew copy [Quantity]&9 Copie la potion qui est dans votre main'
+Help_Create: '&6/brew create <Recipe> [Quality] [Player] &9Crée une boisson avec une
+  qualité optionelle (1-10)'
+Help_Delete: '&6/brew delete &9Supprime la potion qui est dans votre main'
+Help_Distill: '&6/brew distill [Runs] &9Distills the potion in your hand'
+Help_Drink: '&6/brew drink <Recipe> [Quality] [Player] &9Simule [Player] en train
+  de boire une boisson'
+Help_Give: '&6/brew give <Recipe> [Quality] [Player] &9Pseudonyme pour /brew create'
+Help_Help: '&6/brew help [Page] &9Affiche une page spécifique de l’aide'
+Help_Info: '&6/brew info&9 Affiche votre ivresse actuelle ainsi que sa qualité'
+Help_InfoOther: '&6/brew info [Player]&9 Affiche l’ivresse actuelle de <PLAYER>.  Cette
+  commande affiche aussi sa qualité.'
+Help_Puke: '&6/brew puke [Player] [Amount] &9Vous fait vomir, vous ou [Player]'
+Help_Reload: '&6/brew reload &9Recharge la configuration'
+Help_Seal: '&6/brew seal &9Sceller les boissons à vendre en magasin'
+Help_Set: '&6/brew set <Player> <%Drunkeness> [Quality] &9Définit l’ivresse (et la
+  qualité) du joueur'
+Help_Simulate: '&6/brew simulate <Options...> [Ingredients...] &9Simulate brewing'
+Help_Simulate_Age: '&6-a/--age <Barrel Type> <Age Time>'
+Help_Simulate_Brewer: '&6-b/--brewer <Player>'
+Help_Simulate_Cook: '&6-c/--cook <Cook Time>'
+Help_Simulate_Distill: '&6-d/--distill <Distill Runs>'
+Help_Simulate_Options: '&eOptions:'
+Help_Simulate_Player: '&6-p/--player <Player>'
+Help_Simulate_Recipe: '&6-r/--recipe <Recipe>'
+Help_Static: '&6/brew static &9Rend une boisson statique -> Elle n’est plus affectée
+  par l’âge ou la distillation'
+Help_UnLabel: '&6/brew unlabel &9Supprime l’étiquette détaillée d´une potion'
+Help_Wakeup: '&6/brew wakeup list <Page>&9 Affiche une liste de tous les points de
+  réveil'
+Help_WakeupAdd: '&6/brew wakeup add &9Ajoute un point de réveil à votre position'
+Help_WakeupCheck: '&6/brew wakeup check &9Téléportation vers tous les points de réveil'
+Help_WakeupCheckSpecific: '&6/brew wakeup check <id> &9Téléportation vers le point
+  de réveil avec l’ID <id>'
+Help_WakeupList: '&6/brew wakeup list <Page> [World]&9 Affiche une liste de tous les
+  points de réveil de [world]'
+Help_WakeupRemove: '&6/brew wakeup remove <id> &9Enlève le point de réveil avec l’ID
+  <id>'
+
+# Perms
+Perms_NoBarrelCreate: '&cVous n’avez pas la permission de créer des barils !'
+Perms_NoBigBarrelCreate: '&cVous n’avez pas la permission de créer des gros barils
+  !'
+Perms_NoCauldronFill: '&cVous n’avez pas la permission de remplir les bouteilles de
+  ce chaudron !'
+Perms_NoCauldronInsert: '&cVous n’avez pas la permission de mettre des ingrédients
+  dans le chaudron !'
+Perms_NoSmallBarrelCreate: '&cVous n’avez pas la permission de créer de petits barils
+  !'
+
+# Player
+Player_BarrelCreated: Baril créé
+Player_BarrelFull: '&cCe fût n’a plus d’espace pour autre boissons'
+Player_CantDrink: Vous ne pouvez plus boire.
+Player_CauldronInfo1: Ce chaudron a été en ébullition pendant &v1 minutes.
+Player_CauldronInfo2: Ce chaudron est tout juste à ébullition.
+Player_DrunkPassOut: Vous avez trop bu et perdu connaissance.
+Player_Drunkeness: 'Ivresse: '
+Player_Hangover: Gueule de bois
+Player_LoginDeny: Votre personnage tente de se connecter, mais il est trop ivre pour
+  trouver le serveur. Essayez à nouveau !
+Player_LoginDenyLong: Votre personnage est vraiment ivre et a perdu connaissance.
+  Essayez à nouveau dans 10 minutes !
+Player_ShopSealBrew: '&eLes boissons doivent être scellées avant d´être vendues'
+Player_TriedToSay: '&v1 essaie de dire: &0&v2'
+Player_Wake: Oh non ! Je ne me souviens pas comment je suis arrivé ici...
+Player_WakeAlreadyDeleted: '&cLe point de réveil avec l’ID : &6&v1 &cha déjà été supprimé
+  !'
+Player_WakeCancel: '&6Le point de réveil a été annulé'
+Player_WakeCreated: '&aLe point de réveil avec l’ID: &6&v1 &aa été créé avec succès
+  !'
+Player_WakeDeleted: '&aLe point de réveil avec l’ID : &6&v1 &aa été supprimé avec
+  succès !'
+Player_WakeFilled: '&cLe point de réveil avec l’ID: &6&v1&c et la position &6&v2 &v3,
+  &v4, &v5&c est rempli de blocs !'
+Player_WakeHint1: 'Le prochain point de réveil : Tapez dans l’air'
+Player_WakeHint2: 'Pour annuler : &9/brew wakeup cancel'
+Player_WakeLast: '&aC’était le dernier point de réveil.'
+Player_WakeNoCheck: '&cAucun point de réveil n’est actif pour le moment !'
+Player_WakeNoPoints: '&cIl n’y a pas de point de réveil !'
+Player_WakeNotExist: '&cLe point de réveil avec l’ID: &6&v1 &cdn’existe pas !'
+Player_WakeTeleport: 'Téléportation vers le point de réveil avec l’ID : &6&v1&f A
+  la position: &6&v2 &v3, &v4, &v5'
+

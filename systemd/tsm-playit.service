@@ -1,0 +1,16 @@
+[Unit]
+Description=TSM Playit Tunnel
+After=network.target
+
+[Service]
+Type=simple
+User=dev
+WorkingDirectory=%h/projects/tsm/tsmMcServer
+ExecStart=%h/projects/tsm/tsmMcServer/playit-linux-amd64 -s start
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

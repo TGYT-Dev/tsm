@@ -1,0 +1,16 @@
+[Unit]
+Description=TSM Minecraft Server
+After=network.target
+
+[Service]
+Type=simple
+User=dev
+WorkingDirectory=%h/projects/tsm/tsmMcServer
+ExecStart=/usr/bin/java -Xms1G -Xmx4G -jar paper-26.1.2-60.jar --nogui
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

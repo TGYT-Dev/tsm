@@ -1,0 +1,443 @@
+# !!! IMPORTANT: BreweryX configuration files do NOT support external comments! If you add any comments, they will be overwritten !!!
+# Our proper config guide can be found at: https://brewery.lumamc.net/en/guide/edit_config/
+# Still have questions? Join our Discord: https://discord.gg/ZTGCzeKg45
+
+# The translation to be used [en]
+# Available types: en (English), de (German), es (Spanish), fr (French), it (Italian), ru (Russian), zh (Chinese), uk (Ukrainian), pl (Polish)
+language: en
+
+# Should BreweryX check for updates? Specify which service you'd like to use for update checking or disable it.
+# Options available: GitHub, Snapshots, Spigot, None [GitHub]
+resolveUpdatesFrom: GITHUB
+
+# Autosave interval in minutes [10]
+autosave: 10
+
+# Prefix used on messages
+pluginPrefix: '&2[BreweryX]&f '
+
+# Show debug messages in logs [false]
+debug: false
+
+# -- Storage Settings --
+storage:
+  # What type of storage to use [FLATFILE]
+  # Available types: FlatFile, MySQL, SQLite, MongoDB
+  type: SQLITE
+  # The name of the database. When the database is a file, this will be the name of the file. [brewery-data]
+  database: brewery-data
+  tablePrefix: brewery_
+  address: localhost
+  username: root
+  password: password
+
+# If the player wakes up at /home when logging in after excessive drinking (/home plugin must be installed!) [true]
+enableHome: true
+
+# Type of the home-teleport: ['cmd: home']
+# bed = Player will be teleported to his spawn bed
+# 'cmd: home' = /home will be executed by the player. He has to have permissions for it without any delay!
+# 'cmd: spawn' = /spawn will be executed by the player.
+# 'cmd: whatever' = /whatever will be executed by the player.
+homeType: 'cmd: home'
+
+# If the player "wakes up" at a random place when offline for some time while drinking (the places have to be defined with '/brew Wakeup add' through an admin)
+# The Player wakes at the nearest of two random places of his world [true]
+enableWake: true
+
+# If the Player may have to try multiple times when logging in while extremely drunk [true]
+enableLoginDisallow: true
+
+# If the Player faints shortly (gets kicked from the server) if he drinks the max amount of alcohol possible [false]
+enableKickOnOverdrink: false
+
+# If the Player vomits on high drunkenness (drops item defined below) [true]
+# The item can not be collected and stays on the ground until it despawns.
+enablePuke: true
+
+# Items that is dropped multiple times uncollectable when puking [Soul_Sand]
+# Can be list of items such as [Soul_sand, Slime_block, Dirt]
+pukeItem:
+- SOUL_SAND
+
+# Time in seconds until the pukeitems despawn, (mc default is 300 = 5 min) [60]
+# If the item despawn time was changed in the spigot.yml, the pukeDespawntime changes as well.
+pukeDespawntime: 60
+
+# How much the Player stumbles depending on the amount of alcohol he drank. Can be set to 0 and higher than 100 [100]
+stumblePercent: 100
+
+# Display his drunkenness to the player when he drinks a brew or eats a drainItem [true]
+showStatusOnDrink: true
+
+# Consumable Item/strength. Decreases the alcohol level by <strength> when consumed. (list)
+drainItems:
+- BREAD/4
+- MILK_BUCKET/2
+
+# Show Particles over Cauldrons when they have ingredients and a heat source. [true]
+# The changing color of the particles can help with timing some recipes
+enableCauldronParticles: true
+
+# If Cauldron Particles should be reduced to the bare minimum [false]
+minimalParticles: false
+
+# If crafting and using of the Brew Sealing Table is enabled (2 Bottles over 4 Planks) [true, true]
+craftSealingTable: true
+enableSealingTable: true
+
+# By default, Brewery uses Smoker as a Sealing Table, this option allows you to change it
+# IMPORTANT: It needs to be a container - meaning a block that can store items (e.g., SMOKER, CHEST, BLAST_FURNACE).
+sealingTableBlock: SMOKER
+
+# Always show the 1-5 stars on the item depending on the quality. If false, they will only appear when brewing [true]
+alwaysShowQuality: true
+
+# Always show the alcohol content on the item. If false, it will only show in the brewing stand [false]
+# Sealed brews will not show the alcohol content regardless of this setting
+alwaysShowAlc: false
+
+# Always show that a brew is alcoholic by putting "Alcoholic" in the item's lore
+# Sealed brews will show that a brew is alcoholic, but not its alcohol content
+alwaysShowAlcIndicator: true
+
+# If ruined brews show hints about why they were ruined [false].
+# Examples:
+# - "Too much time in the oven..."
+# - "One of the ingredients doesn't taste good..."
+# Note that the hints are for the closest recipe based on the ingredients and may not be 100% accurate.
+showRuinedBrewHints: false
+
+# If we should show who brewed the drink [false]
+showBrewer: false
+
+# If barrels are only created when the sign placed contains the word "barrel" (or a translation when using another language) [true]
+requireKeywordOnSigns: true
+
+# If aging in -Minecraft- Barrels in enabled [true] and how many Brewery drinks can be put into them [6]
+ageInMCBarrels: true
+maxBrewsInMCBarrels: 6
+
+# Duration (in minutes) of a 'year' when aging drinks [20]
+agingYearDuration: 20
+
+# Whether to use the new algorithm for calculating wood type quality and shifting wood type when a brew is aged in different barrels.
+# False is the behavior of the original Brewery plugin.
+# True groups similar barrel types (such as oak and pale oak) together in a more intuitive way. [false]
+newBarrelTypeAlgorithm: false
+
+# Aliases for the '/breweryx' command. Requires a server restart to take effect. (list) [brewery, brew]
+commandAliases:
+- brewery
+- brew
+
+# The used Ingredients and other brewing-data is saved to all Brewery Items. To prevent
+# hacked clients from reading what exactly was used to brew an item, the data can be encoded/scrambled.
+# This is a fast process to stop players from hacking out recipes, once they get hold of a brew.
+
+# Only drawback: brew items can only be used on another server with the same encodeKey.
+# When using Brews on multiple (BungeeCord) Servers, define a MYSQL database in the 'storage' settings.
+
+# So enable this if you want to make recipe cheating harder, but don't share any brews by world download, schematics, or other means. [false]
+enableEncode: false
+encodeKey: -4179005405405362396
+
+# -- Plugin Compatibility --
+
+# Enable checking of other Plugins (if installed) for Barrel Permissions [true]
+# Plugins 'Landlord' and 'Protection Stones' use the WorldGuard Flag. 'ClaimChunk' is natively supported.
+useWorldGuard: true
+useLWC: true
+useGriefPrevention: true
+useTowny: true
+useLands: true
+useBlockLocker: true
+useGMInventories: true
+
+# Use a virtual chest when opening a Barrel to check with all other protection plugins
+# This could confuse Anti-Cheat plugins, but is otherwise good to use
+# use this for 'Residence' Plugin and any others that don't check all cases in the PlayerInteractEvent
+useVirtualChestPerms: false
+
+# Enable the Logging of Barrel Inventories to LogBlock [true]
+useLogBlock: true
+
+# If items in Offhand should be added to the cauldron as well [false]
+useOffhandForCauldron: false
+
+# This option no longer does anything anymore, and will be removed in future releases of BreweryX.
+# BreweryX will load data asynchronously always, with the exception of server startup and shutdown.
+loadDataAsync: true
+
+# Time (in days) that drunkenness-data stays in memory after a player goes offline, to apply hangover etc. [7]
+hangoverDays: 7
+
+# If only Brewery drinks can be put into barrels [false]
+onlyAllowBrewsInBarrels: false
+exemptVanillaBarrels: true
+
+# Color the Item information (lore) depending on quality while it is 1. in a barrel and/or 2. in a brewing stand [true, true]
+colorInBarrels: true
+colorInBrewer: true
+
+# If a Large Barrel can be opened by clicking on any of its blocks, not just Spigot or Sign. This is always true for Small Barrels. [true]
+openLargeBarrelEverywhere: true
+
+# How many rows the inventory of each barrel type should have [3,1]
+# Must be an integer between 1 and 6 (a Minecraft / GUI limitation)
+# (A server restart is required for changes here to take effect)
+barrelInvSizeLarge: 3
+barrelInvSizeSmall: 1
+
+# Allow emptying brews into hoppers to discard brews while keeping the glass bottle [true]
+brewHopperDump: true
+
+# If written Chat is distorted when the Player is Drunk, so that it looks like drunk writing
+# How much the chat is distorted depends on how drunk the Player is
+# Below are settings for what and how changes in chat occur
+enableChatDistortion: true
+
+# Log to the Serverlog what the player actually wrote, before his words were altered [false]
+logRealChat: false
+
+# Text after specified commands will be distored when drunk (list) [- /gl]
+distortCommands:
+- /gl
+- /global
+- /fl
+- /s
+- /letter
+- /g
+- /l
+- /lokal
+- /local
+- /mail send
+- /m
+- /msg
+- /w
+- /whisper
+- /reply
+- /r
+- /t
+- /tell
+
+# Distort the Text written on a Sign while drunk [false]
+distortSignText: false
+
+# Enclose a Chat text with these Letters to bypass Chat Distortion (Use "," as Separator) (list) [- '[,]']
+# Chat Example: Hello i am drunk *I am testing Brewery*
+distortBypass:
+- '*,*'
+- '[,]'
+
+# Words and letters that will be altered when chatting while being drunk.
+# Will be processed from first to last and a written sentence is altered in that order.
+
+# replace: Word or letter to be replaced. (Special: "-space": replaces space, "-random": insert into random position, "-all": everything, "-start": At Beginning, "-end": At the End.)
+# to: What to replace it with.
+# pre: Words and Letters before the wanted word (split with ",")
+# match: true = one of the "pre"-Words has to be before the wanted Word, false = none of the "pre" Words is allowed before the wanted Word
+# alcohol: 1-100 minimum drunkenness after which this word is replaced
+# percentage: Probability of replacing a Word in percent
+words:
+- replace: s
+  to: sh
+  alcohol: 30
+  percentage: 90
+- replace: ch
+  to: sh
+  pre: u,s,o,a
+  match: false
+  alcohol: 10
+  percentage: 70
+- replace: h
+  to: hh
+  pre: sch,h,t
+  match: false
+  alcohol: 20
+  percentage: 60
+- replace: th
+  to: thl
+  alcohol: 30
+  percentage: 40
+- replace: sch
+  to: shk
+  alcohol: 40
+  percentage: 60
+- replace: u
+  to: uuh
+  percentage: 20
+- replace: y
+  to: yy
+  alcohol: 15
+  percentage: 60
+- replace: e
+  to: ee
+  alcohol: 15
+  percentage: 40
+- replace: you
+  to: u
+  percentage: 40
+- replace: u
+  to: uo
+  pre: u
+  match: false
+  percentage: 60
+- replace: that
+  to: taht
+  alcohol: 40
+  percentage: 20
+- replace: p
+  to: b
+  percentage: 30
+- replace: p
+  to: b
+  alcohol: 60
+  percentage: 70
+- replace: up
+  to: ubb
+  alcohol: 25
+  percentage: 80
+- replace: o
+  to: oh
+  percentage: 20
+- replace: ei
+  to: i
+  alcohol: 15
+  percentage: 30
+- replace: b
+  to: bb
+  alcohol: 40
+  percentage: 80
+- replace: '!!!'
+  to: '!!!111!!!eleven!1!'
+  pre: '!'
+  match: false
+  alcohol: 70
+  percentage: 20
+- replace: '!'
+  to: '!!'
+  pre: '!'
+  match: false
+  percentage: 90
+- replace: drunk
+  to: dhrkunn
+  pre: are
+  match: false
+  alcohol: 65
+  percentage: 70
+- replace: walk
+  to: whhealhk
+  pre: you can, you can still, you can not
+  match: false
+  alcohol: 30
+  percentage: 80
+- replace: wtf
+  to: wft
+  alcohol: 40
+  percentage: 20
+- replace: lol
+  to: loool
+  alcohol: 10
+  percentage: 80
+- replace: afk
+  to: aafkayyy
+  alcohol: 30
+  percentage: 30
+- replace: write
+  to: wreitt
+  pre: you can,you can still,you can not
+  match: false
+  alcohol: 50
+  percentage: 80
+- replace: drink
+  to: booze
+  alcohol: 70
+  percentage: 80
+- replace: '?'
+  to: ????
+  pre: '?'
+  match: false
+  alcohol: 40
+  percentage: 80
+- replace: -space
+  to: ''
+  pre: h,g,w
+  match: true
+  alcohol: 10
+- replace: -space
+  to: ''
+  alcohol: 35
+  percentage: 30
+- replace: -space
+  to: ''
+  percentage: 10
+- replace: -start
+  to: dho
+  alcohol: 50
+  percentage: 15
+- replace: -start
+  to: hhn
+  alcohol: 50
+  percentage: 10
+- replace: -random
+  to: lu
+  percentage: 10
+- replace: -random
+  to: lug
+  alcohol: 50
+  percentage: 10
+- replace: -random
+  to: blub
+  alcohol: 80
+  percentage: 20
+- replace: -random
+  to: lerg
+  alcohol: 85
+  percentage: 40
+- replace: -random
+  to: gul
+  alcohol: 80
+  percentage: 40
+- replace: -random
+  to: ' '
+  alcohol: 70
+  percentage: 100
+- replace: -random
+  to: ' '
+  alcohol: 40
+  percentage: 60
+- replace: -random
+  to: ' '
+  alcohol: 30
+  percentage: 50
+- replace: -end
+  to: '!'
+  alcohol: 30
+  percentage: 40
+- replace: -random
+  to: ' *hic* '
+  alcohol: 70
+  percentage: 80
+- replace: -random
+  to: ' *hic* '
+  alcohol: 40
+  percentage: 15
+- replace: -space
+  to: ' *hic* '
+  alcohol: 20
+  percentage: 5
+- replace: -end
+  to: ' *hic*'
+  alcohol: 50
+  percentage: 70
+- replace: -all
+  to: '*burp*'
+  alcohol: 60
+  percentage: 3
+- replace: -all
+  to: '*burp*'
+  alcohol: 80
+  percentage: 6
+
+# Yep, that's it! The end of config.yml! I had so much fun! And you?...

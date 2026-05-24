@@ -1,0 +1,16 @@
+[Unit]
+Description=TSM Discord Bot
+After=network.target
+
+[Service]
+Type=simple
+User=dev
+WorkingDirectory=%h/projects/tsm/tsmWhitelistBot
+ExecStart=/usr/bin/node index.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

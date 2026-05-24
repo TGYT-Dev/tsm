@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSM Management</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+:root {
+  --bg0:#1d2021;--bg0h:#32302f;--bg1:#3c3836;--bg2:#504945;--bg3:#665c54;
+  --fg:#ebdbb2;--fg2:#d5c4a1;--fg4:#a89984;
+  --yellow:#d79921;--yellow2:#fabd2f;
+  --green:#98971a;--green2:#b8bb26;
+  --red:#cc241d;--red2:#fb4934;
+  --blue:#458588;--blue2:#83a598;
+  --orange2:#fe8019;--aqua2:#8ec07c;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg0);color:var(--fg);font-family:'IBM Plex Sans',sans-serif;font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── Header ── */
+header{background:var(--bg0h);border-bottom:1px solid var(--bg2);padding:8px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+header h1{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--yellow2);letter-spacing:2px;text-transform:uppercase;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--bg3);}
+#serverIp{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--fg4);background:var(--bg1);padding:3px 8px;border:1px solid var(--bg2);}
+
+/* ── Tab bar (Obsidian-style) ── */
+#tabBar{display:flex;align-items:stretch;background:var(--bg0h);border-bottom:1px solid var(--bg2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+#tabBar::-webkit-scrollbar{display:none;}
+.tab{display:flex;align-items:center;gap:6px;padding:0 14px;height:36px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--fg4);cursor:pointer;border-right:1px solid var(--bg2);white-space:nowrap;user-select:none;transition:all .1s;flex-shrink:0;}
+.tab:hover{color:var(--fg);background:var(--bg1);}
+.tab.active{color:var(--yellow2);border-bottom:2px solid var(--yellow2);background:var(--bg0);}
+.tab .tab-close{font-size:12px;color:var(--fg4);line-height:1;padding:0 2px;}
+.tab .tab-close:hover{color:var(--red2);}
+
+/* ── Layout ── */
+.layout{display:grid;grid-template-columns:1fr 280px;grid-template-rows:1fr auto;flex:1;overflow:hidden;}
+
+/* ── Pages ── */
+.page{display:none;grid-column:1;grid-row:1 / 3;flex-direction:column;overflow:hidden;}
+.page.active{display:flex;}
+
+/* ── Log panel ── */
+#logPanel{display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--bg2);}
+.filter-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:6px 10px;background:var(--bg0h);border-bottom:1px solid var(--bg2);flex-shrink:0;}
+.toggle-group{display:flex;flex-wrap:wrap;gap:6px;}
+.toggle-label{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--fg4);cursor:pointer;user-select:none;white-space:nowrap;}
+.toggle-label input[type="checkbox"]{accent-color:var(--yellow);cursor:pointer;}
+.toggle-label:hover{color:var(--fg);}
+.log-output{flex:1;overflow-y:auto;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.6;color:var(--fg2);scrollbar-width:thin;scrollbar-color:var(--bg2) transparent;}
+.log-output::-webkit-scrollbar{width:4px;}
+.log-output::-webkit-scrollbar-thumb{background:var(--bg2);}
+.log-line{white-space:pre-wrap;word-break:break-all;}
+.log-info{color:var(--fg2);}.log-chat{color:var(--green2);}.log-command{color:var(--yellow2);}
+.log-join{color:var(--blue2);}.log-moderation{color:var(--red2);}.log-warn{color:var(--orange2);}
+.log-error{color:var(--red2);font-weight:600;}.log-rcon{color:var(--fg4);}.log-bot{color:var(--blue2);}.log-playit{color:var(--purple2,#d3869b);}
+
+/* ── Command bar ── */
+#commandPanel{border:1px solid var(--bg2);border-top:none;flex-shrink:0;}
+.cmd-header{background:var(--bg0h);border-bottom:1px solid var(--bg2);padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;}
+.cmd-form{display:flex;gap:8px;padding:8px;}
+#commandInput{flex:1;background:var(--bg1);border:1px solid var(--bg2);color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 10px;outline:none;transition:border-color .15s;}
+#commandInput:focus{border-color:var(--yellow);}
+#commandInput::placeholder{color:var(--bg3);}
+
+/* ── Sidebar ── */
+#sidebar{grid-column:2;grid-row:1/3;border-left:1px solid var(--bg2);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bg2) transparent;}
+#sidebar::-webkit-scrollbar{width:4px;}
+#sidebar::-webkit-scrollbar-thumb{background:var(--bg2);}
+.section-header{background:var(--bg0h);border-bottom:1px solid var(--bg2);border-top:1px solid var(--bg2);padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;flex-shrink:0;}
+.service-card{border-bottom:1px solid var(--bg1);padding:10px 12px;}
+.service-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.service-name{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--fg);}
+.status-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:2px 6px;letter-spacing:.5px;}
+.status-badge.running{background:var(--green);color:var(--bg0);}
+.status-badge.stopped{background:var(--bg2);color:var(--fg4);}
+.btn-row{display:flex;gap:6px;}
+.btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:4px 10px;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:opacity .1s,transform .1s;}
+.btn:active{transform:scale(.97);}
+.btn:hover{opacity:.85;}
+.btn-start{background:var(--green);color:var(--bg0);}
+.btn-stop{background:var(--red);color:var(--fg);}
+.btn-restart{background:var(--yellow);color:var(--bg0);}
+.btn-action{background:var(--blue);color:var(--fg);}
+.btn-danger{background:var(--red);color:var(--fg);}
+.btn-send{background:var(--yellow);color:var(--bg0);padding:6px 14px;font-size:11px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--bg1);}
+.stat-cell{background:var(--bg0h);padding:8px 10px;}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--fg4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.stat-value{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--yellow2);}
+.player-list{padding:6px 12px;display:flex;flex-wrap:wrap;gap:4px;}
+.player-tag{background:var(--bg1);border:1px solid var(--bg2);color:var(--aqua2);font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 6px;cursor:pointer;transition:all .1s;}
+.player-tag:hover{border-color:var(--yellow2);color:var(--yellow2);}
+.no-players{color:var(--fg4);font-family:'JetBrains Mono',monospace;font-size:10px;padding:6px 12px;}
+.backup-actions{display:flex;gap:6px;padding:8px 12px;}
+.backup-list{overflow-y:auto;max-height:200px;scrollbar-width:thin;scrollbar-color:var(--bg2) transparent;}
+.backup-item{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-bottom:1px solid var(--bg1);gap:8px;}
+.backup-item:hover{background:var(--bg0h);}
+.backup-info{flex:1;overflow:hidden;}
+.backup-name{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--fg2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.backup-meta{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--fg4);}
+.backup-btns{display:flex;gap:4px;flex-shrink:0;}
+
+/* ── Player page ── */
+.player-page{flex:1;overflow-y:auto;padding:24px 48px;display:flex;flex-direction:column;gap:16px;scrollbar-width:thin;scrollbar-color:var(--bg2) transparent;max-width:1200px;margin:0 auto;width:100%;}
+.player-page::-webkit-scrollbar{width:4px;}
+.player-page::-webkit-scrollbar-thumb{background:var(--bg2);}
+.player-header{display:flex;align-items:center;gap:12px;}
+.player-avatar{width:48px;height:48px;image-rendering:pixelated;border:2px solid var(--bg2);}
+.player-name-big{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--yellow2);}
+.player-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--fg4);}
+.player-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bg1);}
+.p-stat{background:var(--bg0h);padding:10px;text-align:center;}
+.p-stat-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--fg4);text-transform:uppercase;margin-bottom:4px;}
+.p-stat-value{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--yellow2);}
+.inv-section-title{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.inv-grid{display:grid;gap:2px;background:var(--bg1);padding:2px;}
+.inv-grid.main{grid-template-columns:repeat(9,1fr);}
+.inv-grid.hotbar{grid-template-columns:repeat(9,1fr);}
+.inv-grid.ender{grid-template-columns:repeat(9,1fr);}
+.inv-slot{background:var(--bg0h);aspect-ratio:1;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;min-width:0;transition:background .1s;font-size:10px;}
+.inv-slot:hover{background:var(--bg2);}
+.inv-slot.empty{cursor:default;}
+.inv-slot .item-icon{width:70%;height:70%;object-fit:contain;image-rendering:pixelated;}
+.inv-slot .item-count{position:absolute;bottom:1px;right:2px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--fg);text-shadow:1px 1px 0 #000;}
+.inv-slot .item-name{display:none;}
+.inv-slot:hover .item-tooltip{display:block;}
+.item-tooltip{display:none;position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--bg1);border:1px solid var(--bg2);padding:4px 8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--fg);white-space:nowrap;z-index:100;pointer-events:none;}
+.give-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.give-input{background:var(--bg1);border:1px solid var(--bg2);color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 8px;outline:none;flex:1;min-width:120px;}
+.give-input:focus{border-color:var(--yellow);}
+.give-input::placeholder{color:var(--bg3);}
+.give-qty{width:60px;}
+
+/* ── Context menu ── */
+#ctxMenu{position:fixed;background:var(--bg1);border:1px solid var(--bg2);z-index:200;min-width:140px;display:none;}
+.ctx-item{padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--fg);cursor:pointer;}
+.ctx-item:hover{background:var(--bg2);}
+.ctx-item.danger{color:var(--red2);}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:20px;right:20px;background:var(--bg1);border:1px solid var(--yellow);color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:11px;padding:8px 14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:300;}
+#toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TSM</h1>
+  <div class="dot"></div>
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--fg4);">management console</span>
+  <div id="serverIp">loading...</div>
+</header>
+
+<!-- Tab bar -->
+<div id="tabBar">
+  <div class="tab active" data-page="console" onclick="switchTab('console')"><span>Console</span></div>
+  <div class="tab" data-page="map"     onclick="switchTab('map')"><span>Map</span></div>
+  <div class="tab" data-page="perf"    onclick="switchTab('perf')"><span>Performance</span></div>
+  <div class="tab" data-page="configs" onclick="switchTab('configs')"><span>Configs</span></div>
+</div>
+
+<div style="display:flex;flex:1;overflow:hidden;">
+
+  <!-- Console page -->
+  <div class="page active" id="page-console" style="grid-column:1;flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="flex:1;display:grid;grid-template-columns:1fr 280px;grid-template-rows:1fr auto;overflow:hidden;">
+
+      <div id="logPanel" style="display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--bg2);">
+        <div class="filter-bar">
+          <div class="toggle-group" id="filterToggles">
+            <label class="toggle-label"><input type="checkbox" data-cat="info"       checked> Info</label>
+            <label class="toggle-label"><input type="checkbox" data-cat="chat"       checked> Chat</label>
+            <label class="toggle-label"><input type="checkbox" data-cat="command"    checked> Commands</label>
+            <label class="toggle-label"><input type="checkbox" data-cat="join"       checked> Join/Leave</label>
+            <label class="toggle-label"><input type="checkbox" data-cat="moderation" checked> Moderation</label>
+            <label class="toggle-label"><input type="checkbox" data-cat="warn"       checked> Warnings</label>
+            <label class="toggle-label"><input type="checkbox" data-cat="error"      checked> Errors</label>
+            <label class="toggle-label"><input type="checkbox" data-cat="rcon"       checked> RCON</label>
+            <label class="toggle-label"><input type="checkbox" data-cat="bot"        checked> Bot</label>
+            <label class="toggle-label"><input type="checkbox" data-cat="playit"     checked> Playit</label>
+          </div>
+          <label class="toggle-label" style="margin-left:auto;">
+            <input type="checkbox" id="autoScroll" checked> Autoscroll
+          </label>
+        </div>
+        <div class="log-output" id="logOutput"></div>
+      </div>
+
+      <div id="commandPanel">
+        <div class="cmd-header">RCON Command</div>
+        <div class="cmd-form">
+          <input id="commandInput" type="text" placeholder="say Hello world..." autocomplete="off">
+          <button class="btn btn-send" onclick="sendCommand()">Send</button>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div id="sidebar" style="grid-column:2;grid-row:1/3;">
+        <div class="section-header">Services</div>
+        <div class="service-card">
+          <div class="service-row"><span class="service-name">MC Server</span><span class="status-badge stopped" id="status-mc">STOPPED</span></div>
+          <div class="btn-row">
+            <button class="btn btn-start" id="btn-mc-toggle" onclick="toggleService('tsm-mc')">Start</button>
+            <button class="btn btn-restart" onclick="serviceAction('tsm-mc','restart')">Restart</button>
+          </div>
+        </div>
+        <div class="service-card">
+          <div class="service-row"><span class="service-name">Bot</span><span class="status-badge stopped" id="status-bot">STOPPED</span></div>
+          <div class="btn-row"><button class="btn btn-start" id="btn-bot-toggle" onclick="toggleService('tsm-bot')">Start</button></div>
+        </div>
+        <div class="service-card">
+          <div class="service-row"><span class="service-name">Playit</span><span class="status-badge stopped" id="status-playit">STOPPED</span></div>
+          <div class="btn-row"><button class="btn btn-start" id="btn-playit-toggle" onclick="toggleService('tsm-playit')">Start</button></div>
+        </div>
+
+        <div class="section-header">Stats</div>
+        <div class="stats-grid">
+          <div class="stat-cell"><div class="stat-label">TPS</div><div class="stat-value" id="stat-tps">—</div></div>
+          <div class="stat-cell"><div class="stat-label">Players</div><div class="stat-value" id="stat-players">—</div></div>
+          <div class="stat-cell"><div class="stat-label">CPU</div><div class="stat-value" id="stat-cpu">—</div></div>
+          <div class="stat-cell"><div class="stat-label">RAM</div><div class="stat-value" id="stat-ram">—</div></div>
+          <div class="stat-cell"><div class="stat-label">Uptime</div><div class="stat-value" id="stat-uptime">—</div></div>
+          <div class="stat-cell"><div class="stat-label">Disk</div><div class="stat-value" id="stat-disk">—</div></div>
+        </div>
+
+        <div class="section-header">Online Players</div>
+        <div id="playerList" class="no-players">No players online</div>
+
+        <div class="section-header">Backups</div>
+        <div class="backup-actions">
+          <button class="btn btn-action" onclick="createBackup()">Create</button>
+          <button class="btn btn-action" onclick="loadBackups()">Refresh</button>
+        </div>
+        <div class="backup-list" id="backupList"></div>
+      </div>
+
+    </div>
+  </div>
+
+
+
+  <!-- Map page -->
+  <div class="page" id="page-map" style="flex:1;overflow:hidden;padding:16px;flex-direction:column;gap:12px;">
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;">World Map</span>
+      <select id="worldSelect" style="background:var(--bg1);border:1px solid var(--bg2);color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 6px;outline:none;">
+        <option value="world">Overworld</option>
+        <option value="world_nether">Nether</option>
+        <option value="world_the_end">The End</option>
+      </select>
+      <button class="btn btn-action" onclick="renderMap()" style="font-size:9px;padding:3px 8px;">Render</button>
+      <span id="mapStatus" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--fg4);">scroll to zoom · drag to pan</span>
+    </div>
+    <div style="flex:1;position:relative;overflow:hidden;background:var(--bg1);border:1px solid var(--bg2);">
+      <canvas id="mapCanvas" style="width:100%;height:100%;image-rendering:pixelated;"></canvas>
+      <div id="mapTooltip" style="display:none;position:absolute;background:var(--bg1);border:1px solid var(--bg2);padding:4px 8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--fg);pointer-events:none;z-index:10;"></div>
+    </div>
+  </div>
+
+  <!-- Performance page -->
+  <div class="page" id="page-perf" style="flex:1;overflow-y:auto;padding:16px;flex-direction:column;gap:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="background:var(--bg0h);border:1px solid var(--bg2);padding:12px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">TPS</div>
+        <canvas id="tpsChart" height="120"></canvas>
+      </div>
+      <div style="background:var(--bg0h);border:1px solid var(--bg2);padding:12px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Players Online</div>
+        <canvas id="playersChart" height="120"></canvas>
+      </div>
+      <div style="background:var(--bg0h);border:1px solid var(--bg2);padding:12px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">CPU %</div>
+        <canvas id="cpuChart" height="120"></canvas>
+      </div>
+      <div style="background:var(--bg0h);border:1px solid var(--bg2);padding:12px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">RAM %</div>
+        <canvas id="ramChart" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configs page -->
+  <div class="page" id="page-configs" style="flex:1;overflow:hidden;flex-direction:column;">
+    <div style="display:flex;gap:0;height:100%;overflow:hidden;">
+      <div id="configFileList" style="width:220px;flex-shrink:0;border-right:1px solid var(--bg2);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bg2) transparent;">
+        <div style="padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--bg2);background:var(--bg0h);">Config Files</div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg0h);border-bottom:1px solid var(--bg2);flex-shrink:0;">
+          <span id="configFileName" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--fg4);">Select a file</span>
+          <button class="btn btn-action" onclick="saveConfig()" id="saveConfigBtn" style="display:none;">Save</button>
+        </div>
+        <textarea id="configEditor" spellcheck="false" style="flex:1;background:var(--bg0);color:var(--fg2);font-family:'JetBrains Mono',monospace;font-size:12px;padding:12px;border:none;outline:none;resize:none;line-height:1.6;scrollbar-width:thin;scrollbar-color:var(--bg2) transparent;"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Context menu -->
+<div id="ctxMenu">
+  <div class="ctx-item danger" id="ctxRemove" onclick="ctxAction('remove')">Remove Item</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+const allLogs = [];
+let autoScrollOn = true;
+const activeCategories = new Set(['info','chat','command','join','moderation','warn','error','rcon','bot','playit']);
+const openTabs = {}; // name -> { type, data }
+let ctxTarget = null; // { playerName, invType, slot }
+
+const logOutput  = document.getElementById('logOutput');
+const autoScroll = document.getElementById('autoScroll');
+autoScroll.addEventListener('change', () => { autoScrollOn = autoScroll.checked; });
+
+const catClass = { info:'log-info', chat:'log-chat', command:'log-command', join:'log-join', moderation:'log-moderation', warn:'log-warn', error:'log-error', rcon:'log-rcon', bot:'log-bot', playit:'log-playit' };
+
+// ── Log ────────────────────────────────────────────────────────────────────────
+const appendToLog = (line, category) => {
+  if (!activeCategories.has(category)) return;
+  const div = document.createElement('div');
+  div.className = `log-line ${catClass[category] || 'log-info'}`;
+  div.textContent = line;
+  logOutput.appendChild(div);
+  while (logOutput.children.length > 500) logOutput.removeChild(logOutput.firstChild);
+  if (autoScrollOn) logOutput.scrollTop = logOutput.scrollHeight;
+};
+
+const appendLog = (line, category) => {
+  allLogs.push({ line, category });
+  if (allLogs.length > 500) allLogs.shift();
+  appendToLog(line, category);
+};
+
+const rerenderLogs = () => {
+  logOutput.innerHTML = '';
+  allLogs.forEach(({ line, category }) => appendToLog(line, category));
+};
+
+// Restore saved toggle state
+const savedToggles = JSON.parse(localStorage.getItem('logToggles') || '{}');
+document.querySelectorAll('#filterToggles input[data-cat]').forEach(cb => {
+  if (cb.dataset.cat in savedToggles) {
+    cb.checked = savedToggles[cb.dataset.cat];
+    if (!cb.checked) activeCategories.delete(cb.dataset.cat);
+  }
+});
+
+document.getElementById('filterToggles').addEventListener('change', (e) => {
+  const cb = e.target;
+  if (!cb.dataset.cat) return;
+  if (cb.checked) activeCategories.add(cb.dataset.cat);
+  else activeCategories.delete(cb.dataset.cat);
+  // Save state
+  const saved = JSON.parse(localStorage.getItem('logToggles') || '{}');
+  saved[cb.dataset.cat] = cb.checked;
+  localStorage.setItem('logToggles', JSON.stringify(saved));
+  rerenderLogs();
+});
+
+// ── WebSocket ──────────────────────────────────────────────────────────────────
+const connectWs = () => {
+  const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`);
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'log')          appendLog(msg.line, msg.category);
+    if (msg.type === 'statusUpdate') fetchStatus();
+    if (msg.type === 'stats')        { updateLiveStats(msg); }
+    if (msg.type === 'positions')    handlePositions(msg.players);
+    if (msg.type === 'tpsWarning')   appendLog(`[WARNING] TPS dropped to ${msg.tps}`, 'warn');
+    if (msg.type === 'playerUpdate') fetchPlayers();
+    if (msg.type === 'backupComplete') { toast(`Backup complete: ${msg.name}`); loadBackups(); }
+    if (msg.type === 'backupError')    toast(`Backup error: ${msg.error}`);
+  };
+  ws.onclose = () => setTimeout(connectWs, 2000);
+};
+connectWs();
+
+// ── Toast ──────────────────────────────────────────────────────────────────────
+const toastEl = document.getElementById('toast');
+let toastTimer;
+const toast = (msg) => {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3000);
+};
+
+// ── Status ─────────────────────────────────────────────────────────────────────
+const fetchStatus = async () => {
+  try {
+    const d = await (await fetch('/api/status')).json();
+    updateSvcUI('mc', d.mc); updateSvcUI('bot', d.bot); updateSvcUI('playit', d.playit);
+  } catch {}
+};
+
+const updateSvcUI = (name, status) => {
+  const badge = document.getElementById(`status-${name}`);
+  const btn   = document.getElementById(`btn-${name}-toggle`);
+  if (!badge || !btn) return;
+  const running = status === 'running';
+  badge.textContent = status.toUpperCase();
+  badge.className   = `status-badge ${status}`;
+  btn.textContent   = running ? 'Stop' : 'Start';
+  btn.className     = `btn ${running ? 'btn-stop' : 'btn-start'}`;
+};
+
+const serviceAction = async (name, action) => {
+  await fetch(`/api/service/${name}/${action}`, { method: 'POST' });
+  toast(`${name} ${action}...`);
+  setTimeout(fetchStatus, 1200);
+};
+
+const toggleService = async (name) => {
+  try {
+    const d = await (await fetch('/api/status')).json();
+    const key = name.replace('tsm-', '');
+    serviceAction(name, d[key] === 'running' ? 'stop' : 'start');
+  } catch {}
+};
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
+const updateLiveStats = (msg) => {
+  if (msg.tps  !== undefined) document.getElementById('stat-tps').textContent     = msg.tps;
+  if (msg.online !== undefined) document.getElementById('stat-players').textContent = `${msg.online}/${msg.max}`;
+};
+
+const fetchStats = async () => {
+  try {
+    const d = await (await fetch('/api/stats')).json();
+    document.getElementById('stat-cpu').textContent  = d.cpu      ?? '—';
+    document.getElementById('stat-ram').textContent  = d.ram      ?? '—';
+    document.getElementById('stat-disk').textContent = d.diskUsage ?? '—';
+    const secs = parseUptimeToSeconds(d.uptime);
+    if (secs !== null) {
+      uptimeSeconds = secs;
+      uptimeTicking = true;
+      document.getElementById('stat-uptime').textContent = formatUptime(uptimeSeconds);
+    } else {
+      uptimeTicking = false;
+      document.getElementById('stat-uptime').textContent = d.uptime ?? '—';
+    }
+  } catch {}
+};
+
+// ── Players ────────────────────────────────────────────────────────────────────
+const fetchPlayers = async () => {
+  try {
+    const players = await (await fetch('/api/players')).json();
+    const el = document.getElementById('playerList');
+    if (!players.length) {
+      el.className = 'no-players';
+      el.textContent = 'No players online';
+    } else {
+      el.className = 'player-list';
+      el.innerHTML = players.map(p => `<span class="player-tag" onclick="openPlayerTab('${p.name}')">${p.name}</span>`).join('');
+    }
+  } catch {}
+};
+
+// ── Server IP ──────────────────────────────────────────────────────────────────
+const fetchIp = async () => {
+  try {
+    const d = await (await fetch('/api/serverip')).json();
+    document.getElementById('serverIp').textContent = d.ip || 'unknown';
+  } catch {}
+};
+
+// ── RCON command ───────────────────────────────────────────────────────────────
+const sendCommand = async () => {
+  const input = document.getElementById('commandInput');
+  const cmd   = input.value.trim();
+  if (!cmd) return;
+  input.value = '';
+  appendLog(`> ${cmd}`, 'command');
+  try {
+    const d = await (await fetch('/api/rcon', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ command:cmd }) })).json();
+    if (d.result) appendLog(d.result, 'info');
+    if (d.error)  appendLog(`[ERROR] ${d.error}`, 'error');
+  } catch (err) { appendLog(`[ERROR] ${err.message}`, 'error'); }
+};
+document.getElementById('commandInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendCommand(); });
+
+// ── Tabs ───────────────────────────────────────────────────────────────────────
+const switchTab = (id) => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === id));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === `page-${id}`));
+  const isConsole = id === 'console';
+  const isPlayer  = id.startsWith('player-');
+  const fullScreen = !isConsole;
+  document.getElementById('sidebar').style.display      = fullScreen ? 'none' : '';
+  document.getElementById('commandPanel').style.display = fullScreen ? 'none' : '';
+  if (id === 'map')     { setTimeout(resizeMap, 50); }
+  if (id === 'perf')    { setTimeout(() => { updateCharts(); }, 100); }
+  if (id === 'configs') { loadConfigFiles(); }
+};
+
+const openPlayerTab = async (name) => {
+  if (openTabs[name]) { switchTab(`player-${name}`); return; }
+  openTabs[name] = true;
+
+  // Add tab
+  const tabBar = document.getElementById('tabBar');
+  const tab    = document.createElement('div');
+  tab.className    = 'tab';
+  tab.dataset.page = `player-${name}`;
+  tab.innerHTML    = `<span onclick="switchTab('player-${name}')">${name}</span><span class="tab-close" onclick="closePlayerTab('${name}')">✕</span>`;
+  tabBar.appendChild(tab);
+
+  // Create page
+  const page = document.createElement('div');
+  page.className = 'page';
+  page.id        = `page-player-${name}`;
+  page.innerHTML = `<div class="player-page" id="pp-${name}"><div style="color:var(--fg4);font-family:'JetBrains Mono',monospace;font-size:11px;">Loading ${name}...</div></div>`;
+  document.querySelector('.layout, [style*="flex:1"]') || document.body;
+
+  // Insert before sidebar wrapper
+  const wrapper = document.querySelector('body > div:last-of-type') || document.body;
+  // Actually append to the flex container
+  document.querySelector('body > div[style*="flex:1"]').appendChild(page);
+
+  switchTab(`player-${name}`);
+  await loadPlayerPage(name);
+};
+
+const closePlayerTab = (name) => {
+  delete openTabs[name];
+  document.querySelector(`.tab[data-page="player-${name}"]`)?.remove();
+  document.getElementById(`page-player-${name}`)?.remove();
+  switchTab('console');
+};
+
+// ── Player page ────────────────────────────────────────────────────────────────
+const ITEM_TEXTURE_BASE = 'https://mc-item-renderer.vercel.app/item/';
+
+// Blocks that have textures in /block/ rather than /item/
+const BLOCK_TEXTURE_NAMES = new Set([
+  'stone','granite','polished_granite','diorite','polished_diorite','andesite','polished_andesite',
+  'grass_block','dirt','coarse_dirt','podzol','cobblestone','oak_planks','spruce_planks',
+  'birch_planks','jungle_planks','acacia_planks','dark_oak_planks','mangrove_planks','cherry_planks',
+  'oak_log','spruce_log','birch_log','jungle_log','acacia_log','dark_oak_log','mangrove_log','cherry_log',
+  'oak_leaves','spruce_leaves','birch_leaves','jungle_leaves','acacia_leaves','dark_oak_leaves',
+  'mangrove_leaves','cherry_leaves','azalea_leaves','sponge','wet_sponge','glass','lapis_block',
+  'sandstone','chiseled_sandstone','cut_sandstone','gold_block','iron_block','bricks','tnt',
+  'bookshelf','mossy_cobblestone','obsidian','crafting_table','furnace','cobblestone_stairs',
+  'chest','diamond_block','farmland','sand','gravel','gold_ore','deepslate_gold_ore',
+  'iron_ore','deepslate_iron_ore','coal_ore','deepslate_coal_ore','oak_slab','stone_slab',
+  'smooth_stone_slab','sandstone_slab','snow','clay','jukebox','oak_fence','pumpkin',
+  'netherrack','soul_sand','glowstone','carved_pumpkin','jack_o_lantern','melon',
+  'mycelium','nether_brick','end_stone','emerald_block','redstone_block','quartz_block',
+  'white_concrete','orange_concrete','magenta_concrete','light_blue_concrete','yellow_concrete',
+  'lime_concrete','pink_concrete','gray_concrete','light_gray_concrete','cyan_concrete',
+  'purple_concrete','blue_concrete','brown_concrete','green_concrete','red_concrete','black_concrete',
+  'white_wool','orange_wool','magenta_wool','light_blue_wool','yellow_wool','lime_wool',
+  'pink_wool','gray_wool','light_gray_wool','cyan_wool','purple_wool','blue_wool',
+  'brown_wool','green_wool','red_wool','black_wool',
+  'white_terracotta','orange_terracotta','magenta_terracotta','light_blue_terracotta',
+  'yellow_terracotta','lime_terracotta','pink_terracotta','gray_terracotta',
+  'light_gray_terracotta','cyan_terracotta','purple_terracotta','blue_terracotta',
+  'brown_terracotta','green_terracotta','red_terracotta','black_terracotta','terracotta',
+  'basalt','polished_basalt','smooth_basalt','blackstone','gilded_blackstone',
+  'ancient_debris','netherite_block','crying_obsidian','magma_block','soul_soil',
+  'warped_nylium','crimson_nylium','warped_stem','crimson_stem','shroomlight',
+  'target','honey_block','honeycomb_block','lodestone','respawn_anchor',
+  'amethyst_block','calcite','tuff','dripstone_block','moss_block','sculk',
+  'sculk_catalyst','deepslate','cobbled_deepslate','polished_deepslate',
+  'deepslate_bricks','deepslate_tiles','chiseled_deepslate',
+  'raw_iron_block','raw_gold_block','raw_copper_block','copper_block',
+  'exposed_copper','weathered_copper','oxidized_copper',
+  'cut_copper','exposed_cut_copper','weathered_cut_copper','oxidized_cut_copper',
+  'mud','packed_mud','mud_bricks','mangrove_roots','muddy_mangrove_roots',
+  'bamboo_block','stripped_bamboo_block','cherry_log','cherry_planks','pink_petals',
+  'sniffer_egg','suspicious_sand','suspicious_gravel','decorated_pot',
+]);
+
+const ASSET_BASE = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21/assets/minecraft/textures';
+
+// Returns candidate URLs to try in order
+const itemIconUrls = (material) => {
+  const lower = material.toLowerCase().replace('minecraft:', '');
+  const urls = [];
+  if (BLOCK_TEXTURE_NAMES.has(lower)) {
+    urls.push(`${ASSET_BASE}/block/${lower}.png`);
+    urls.push(`${ASSET_BASE}/item/${lower}.png`);
+  } else {
+    urls.push(`${ASSET_BASE}/item/${lower}.png`);
+    urls.push(`${ASSET_BASE}/block/${lower}.png`);
+  }
+  // Some blocks use _side or _top suffix
+  urls.push(`${ASSET_BASE}/block/${lower}_side.png`);
+  urls.push(`${ASSET_BASE}/block/${lower}_top.png`);
+  return urls;
+};
+
+// Try multiple URLs in sequence
+const tryLoadImage = (img, urls, index = 0) => {
+  if (index >= urls.length) {
+    img.style.display = 'none';
+    const fallback = img.nextElementSibling;
+    if (fallback) fallback.style.display = 'flex';
+    return;
+  }
+  img.src = urls[index];
+  img.onerror = () => tryLoadImage(img, urls, index + 1);
+};
+
+const renderSlot = (item, index, invType, playerName) => {
+  if (!item) return `<div class="inv-slot empty"></div>`;
+  const name        = (item.displayName || item.material || '').replace(/_/g, ' ');
+  const urlsJson    = JSON.stringify(itemIconUrls(item.material || '')).replace(/"/g, '&quot;');
+  return `
+    <div class="inv-slot" oncontextmenu="showCtxMenu(event,'${playerName}','${invType}',${index})" title="${name}">
+      <img class="item-icon"
+        src="${itemIconUrls(item.material || '')[0]}"
+        onload="this.style.display=''"
+        onerror="tryLoadImage(this, JSON.parse(this.dataset.urls), 1)"
+        data-urls="${urlsJson}"
+        style="display:block;">
+      <span class="item-fallback" style="display:none;font-size:7px;text-align:center;color:var(--fg4);word-break:break-all;padding:2px;align-items:center;justify-content:center;">${(item.material||'').replace('minecraft:','').replace(/_/g,' ').substring(0,8)}</span>
+      ${item.amount > 1 ? `<span class="item-count">${item.amount}</span>` : ''}
+      <div class="item-tooltip">${name} ×${item.amount}</div>
+    </div>`;
+};
+
+const loadPlayerPage = async (name) => {
+  const pp = document.getElementById(`pp-${name}`);
+  try {
+    const [stats, invRaw, enderRaw] = await Promise.all([
+      fetch(`/api/player/${name}/stats`).then(r => r.json()),
+      fetch(`/api/player/${name}/inventory`).then(r => r.json()),
+      fetch(`/api/player/${name}/enderchest`).then(r => r.json()),
+    ]);
+
+    // Guard: ensure arrays even if plugin returns error object
+    const inv   = Array.isArray(invRaw)   ? invRaw   : [];
+    const ender = Array.isArray(enderRaw) ? enderRaw : [];
+
+    // Pad to expected sizes so slice/index is safe
+    while (inv.length   < 41) inv.push(null);
+    while (ender.length < 27) ender.push(null);
+
+    // Main inv: slots 9-35 = main (27), slots 0-8 = hotbar, slots 36-39 = armor, 40 = offhand
+    const hotbar  = inv.slice(0, 9);
+    const main    = inv.slice(9, 36);
+    const armor   = inv.slice(36, 40);
+    const offhand = inv[40];
+
+    pp.innerHTML = `
+      <div class="player-header">
+        <img class="player-avatar" src="https://mc-heads.net/avatar/${name}/48" onerror="this.src='https://mc-heads.net/avatar/Steve/48'">
+        <div>
+          <div class="player-name-big">${name}</div>
+          <div class="player-meta">${stats.world || ''} · ${stats.gamemode || ''}</div>
+          <div class="player-meta">X:${Math.round(stats.x)} Y:${Math.round(stats.y)} Z:${Math.round(stats.z)}</div>
+        </div>
+      </div>
+
+      <div class="player-stats-grid">
+        <div class="p-stat"><div class="p-stat-label">Health</div><div class="p-stat-value">${stats.health?.toFixed(1) ?? '—'}/${stats.maxHealth?.toFixed(0) ?? '—'}</div></div>
+        <div class="p-stat"><div class="p-stat-label">Food</div><div class="p-stat-value">${stats.food ?? '—'}/20</div></div>
+        <div class="p-stat"><div class="p-stat-label">Level</div><div class="p-stat-value">${stats.level ?? '—'}</div></div>
+        <div class="p-stat"><div class="p-stat-label">XP</div><div class="p-stat-value">${stats.xp ?? '—'}%</div></div>
+      </div>
+
+      <div>
+        <div class="inv-section-title">Inventory</div>
+        <div class="inv-grid main" style="margin-bottom:2px;">${main.map((it,i) => renderSlot(it, i+9, 'inventory', name)).join('')}</div>
+        <div class="inv-grid hotbar">${hotbar.map((it,i) => renderSlot(it, i, 'inventory', name)).join('')}</div>
+      </div>
+
+      <div>
+        <div class="inv-section-title">
+          Ender Chest
+          <button class="btn btn-action" style="font-size:9px;padding:2px 6px;" onclick="refreshPlayerPage('${name}')">Refresh</button>
+        </div>
+        <div class="inv-grid ender">${ender.map((it,i) => renderSlot(it, i, 'enderchest', name)).join('')}</div>
+      </div>
+
+      <div>
+        <div class="inv-section-title">Give Item</div>
+        <div class="give-form">
+          <input class="give-input" id="give-mat-${name}" placeholder="minecraft:diamond" autocomplete="off">
+          <input class="give-input give-qty" id="give-qty-${name}" type="number" value="1" min="1" max="64">
+          <button class="btn btn-action" onclick="giveItem('${name}')">Give</button>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    pp.innerHTML = `<div style="color:var(--red2);font-family:'JetBrains Mono',monospace;font-size:11px;padding:16px;">Failed to load player data: ${err.message}</div>`;
+  }
+};
+
+const refreshPlayerPage = (name) => loadPlayerPage(name);
+
+// ── Give item ──────────────────────────────────────────────────────────────────
+const giveItem = async (name) => {
+  const mat = document.getElementById(`give-mat-${name}`).value.trim().replace('minecraft:','').toUpperCase();
+  const qty = parseInt(document.getElementById(`give-qty-${name}`).value) || 1;
+  if (!mat) return;
+  try {
+    const d = await (await fetch(`/api/player/${name}/give`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ material: mat, amount: qty }) })).json();
+    if (d.ok) { toast(`Gave ${qty}x ${mat} to ${name}`); refreshPlayerPage(name); }
+    else toast(`Error: ${d.error}`);
+  } catch (err) { toast(`Error: ${err.message}`); }
+};
+
+// ── Context menu ───────────────────────────────────────────────────────────────
+const ctxMenu = document.getElementById('ctxMenu');
+
+const showCtxMenu = (e, playerName, invType, slot) => {
+  e.preventDefault();
+  ctxTarget = { playerName, invType, slot };
+  ctxMenu.style.display = 'block';
+  ctxMenu.style.left    = e.clientX + 'px';
+  ctxMenu.style.top     = e.clientY + 'px';
+};
+
+const ctxAction = async (action) => {
+  ctxMenu.style.display = 'none';
+  if (!ctxTarget) return;
+  const { playerName, invType, slot } = ctxTarget;
+  if (action === 'remove') {
+    try {
+      await fetch(`/api/player/${playerName}/${invType}/${slot}`, { method:'DELETE' });
+      toast('Item removed');
+      refreshPlayerPage(playerName);
+    } catch (err) { toast(`Error: ${err.message}`); }
+  }
+  ctxTarget = null;
+};
+
+document.addEventListener('click', () => { ctxMenu.style.display = 'none'; });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') ctxMenu.style.display = 'none'; });
+
+// ── Backups ────────────────────────────────────────────────────────────────────
+const fmtSize = (b) => b > 1e9 ? (b/1e9).toFixed(1)+' GB' : b > 1e6 ? (b/1e6).toFixed(1)+' MB' : (b/1e3).toFixed(0)+' KB';
+
+const loadBackups = async () => {
+  try {
+    const items = await (await fetch('/api/backups')).json();
+    const list  = document.getElementById('backupList');
+    if (!items.length) { list.innerHTML = '<div class="no-players">No backups found</div>'; return; }
+    list.innerHTML = items.map(b => `
+      <div class="backup-item">
+        <div class="backup-info">
+          <div class="backup-name">${b.name}</div>
+          <div class="backup-meta">${new Date(b.created).toLocaleString()} · ${fmtSize(b.size)}</div>
+        </div>
+        <div class="backup-btns">
+          <button class="btn btn-action" style="font-size:9px;padding:3px 6px;" onclick="restoreBackup('${b.name}')">Restore</button>
+          <button class="btn btn-danger" style="font-size:9px;padding:3px 6px;" onclick="deleteBackup('${b.name}')">Del</button>
+        </div>
+      </div>`).join('');
+  } catch {}
+};
+
+const createBackup  = async () => { toast('Creating backup...'); await fetch('/api/backups/create', { method:'POST' }); };
+const restoreBackup = async (n) => { if (!confirm(`Restore ${n}?\nServer should be stopped first.`)) return; await fetch(`/api/backups/restore/${n}`, { method:'POST' }); toast(`Restore initiated: ${n}`); };
+const deleteBackup  = async (n) => { if (!confirm(`Delete ${n}?`)) return; await fetch(`/api/backups/${n}`, { method:'DELETE' }); toast('Deleted'); loadBackups(); };
+
+// ── Uptime ticker ──────────────────────────────────────────────────────────────
+let uptimeSeconds = 0;
+let uptimeTicking = false;
+
+const parseUptimeToSeconds = (str) => {
+  if (!str || str === '—' || str === 'N/A') return null;
+  // formats: HH:MM:SS or MM:SS or D-HH:MM:SS
+  const parts = str.split(':').map(Number);
+  if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+  if (parts.length === 2) return parts[0]*60 + parts[1];
+  return null;
+};
+
+const formatUptime = (s) => {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+};
+
+setInterval(() => {
+  if (!uptimeTicking) return;
+  uptimeSeconds++;
+  document.getElementById('stat-uptime').textContent = formatUptime(uptimeSeconds);
+}, 1000);
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+fetchStatus();
+fetchStats();
+fetchPlayers();
+fetchIp();
+loadBackups();
+setInterval(fetchStatus, 5000);
+setInterval(fetchStats, 15000);
+setInterval(fetchPlayers, 10000);
+</script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+# !!! IMPORTANT: BreweryX configuration files do NOT support external comments! If you add any comments, they will be overwritten !!!
+# Translations for BreweryX
+
+# Brew
+Brew_Alc: Алк &v1мл
+Brew_Alcoholic: (Алкогольное)
+Brew_BadPotion: Испорченное зелье
+Brew_BarrelRiped: Настоявшееся в бочке
+Brew_Brewer: 'Сварил: &v1'
+Brew_DistillUndefined: Мутнодистиллированный
+Brew_Distilled: Дистиллированный
+Brew_fermented: ферментировано
+Brew_HundredsOfYears: вековой
+Brew_Ingredients: Ингредиенты
+Brew_LessDistilled: Малодистиллированный
+Brew_minute: минут
+Brew_MinutePluralPostfix: ы
+Brew_OneYear: Один год
+Brew_times: -раз
+Brew_ThickBrew: Мутный напиток
+Brew_Undefined: Котельный напиток
+Brew_Woodtype: тип дерева
+Brew_Years: года
+
+# Brew Defects
+Defect_BadAged:
+- Не стоило это настаивать...
+Defect_BadDistill:
+- Напиток испарился...
+- Вкус исчез...
+Defect_HighCount:
+- Вкус одного из ингредиентов перебивает остальные...
+- Слишком много чего-то...
+Defect_LowCount:
+- Один из ингредиентов почти не ощущается...
+- Вкус одного из ингредиентов слишком слаб...
+Defect_MissingIngredient:
+- Похоже, чего-то не хватает...
+- Нужно больше чего-то...
+Defect_NeedsDistill:
+- Не хватает дистилляции...
+Defect_NeedsDistillAlc:
+- Крепкость почти не ощущается...
+Defect_NoRecipesRegistered:
+- В этой вселенной нет напитков...
+Defect_OverAged:
+- Воняет старостью...
+- Долго настаивалось...
+Defect_OverAgedAlc:
+- Воняет уксусом...
+- Долго настаивалось...
+Defect_Overcooked:
+- Передержали в котле...
+- Переварилось...
+Defect_UnderAged:
+- Недостаточно настоялось...
+- Вкус недостаточно выражен...
+Defect_Uncooked:
+- Слишком рано достали...
+- Недоварено...
+Defect_WrongIngredient:
+- В составе есть что-то лишнее...
+- Какой-то ингредиент совсем не подходит сюда...
+Defect_WrongWood:
+- По вкусу слишком похоже на &v1...
+- Запах &v1 перебивает вкус...
+
+# CMD
+CMD_Aged: '&aДобавлено &v1 лет настаивания напитку.'
+CMD_Configname: '&aНазвание предмета для конфига: &f&v1'
+CMD_Configname_Error: '&cНет предмета в руке.'
+CMD_Copy_Error: '&6&v1 &cБутылки не поместились в инвентарь'
+CMD_Created: '&aНапиток создан'
+CMD_Cannot_Distill: '&cЭти ингредиенты невозможно дистиллировать'
+CMD_Distill_Ruined: '&eНапиток испортился во время дистилляции'
+CMD_Distilled: '&aДобавлено &v1 циклов дистилляций напитку.'
+CMD_Drink: '&aТы выпил одну &v1'
+CMD_DrinkOther: '&a&v1 выпил одну &v2'
+CMD_Duplicate_Option: '&cПовторяющая опция: "&v1"'
+CMD_Info_Drunk: '&v1 на &6&v2% &fпьян, качество опьянения: &6&v3'
+CMD_Info_NotDrunk: '&v1 не пьян'
+CMD_Ingredient: ингредиент
+CMD_Invalid_Age_Time: '&cКол-во лет "&v1" Должно быть положительным числом'
+CMD_Invalid_Cook_Time: '&cВремя варки "&v1" Должно быть положительным числом'
+CMD_Invalid_Distill_Runs: '&cКол-во дистилляций "&v1" Должно быть положительным числом'
+CMD_Invalid_Ingredient: '&c"&v1" не является подходящим ингредиентом. Вы имели в виду
+  "&v2/&v1"?'
+CMD_Invalid_Option: '&c"&v1" не является подходящей опцией'
+CMD_Invalid_Wood_Type: '&cНеверный тип бочки "&v1"'
+CMD_Missing_Cook_Time: '&cСимулированный напиток должен иметь параметр "--cook" или
+  "--recipe"'
+CMD_Missing_Ingredients: '&cСимулированный напиток должен иметь хотя бы один ингредиент'
+CMD_NonStatic: '&eНапиток больше не настаивается и теперь начнет бродить в бочке.'
+CMD_Player: '&a&v1 теперь пьян на &6&v2% &a, качество опьянения: &6&v3'
+CMD_Player_Error: '&cКачество должно быть от 1 до 10!'
+CMD_Reload: '&aКонфиг успешно перезагружен!'
+CMD_Set: '&aУровень опьянения &v1 успешно установлен на &v2 с качеством &v3.'
+CMD_Simulated: '&aСимулированный напиток создан'
+CMD_Static: '&aНапиток закупорен и не будет бродить в бочках.'
+CMD_UnLabel: '&aНекоторые детали описания были скрыты!'
+CMD_Age_Ruined: '&eНапиток испортился во время настаивания'
+
+# Error
+Error_AlreadyUnlabeled: '&cДетали описания напитка в твоей руке уже скрыты!'
+Error_ConfigUpdate: 'Неизвестная версия конфига Brewery: v&v1, конфиг не обновлён!'
+Error_InvalidAmount: '&cНеверное количество: &v1'
+Error_InvalidMaterial: '&cНе удалось найти материал: &v1'
+Error_InvalidPluginItem: '&cНе удалось найти предмет из плагина: &v1'
+Error_ItemNotPotion: '&cПредмет в твоей руке не является напитком!'
+Error_MissingBarrelType: '&cInvalid BarrelType'
+Error_NoBarrelAccess: '&cУ тебя нет прав на доступ к этой бочке!'
+Error_NoBrewName: '&cРецепт с названием: ''&v1&c'' не найден!'
+Error_NoPermissions: '&cУ тебя нет прав на это!'
+Error_NoPlayer: '&cИгрок не найден: &v1'
+Error_PlayerCommand: '&cЭту команду можно использовать только как игрок!'
+Error_Recipeload: '&cНе все рецепты были загружены: проверь консоль!'
+Error_SealedAlwaysStatic: Закупоренные напитки всегда статичны!
+Error_SealingTableDisabled: '&cСтол закупорки отключён.'
+Error_ShowHelp: Используйте &6/brew help &fдля отображения помощи
+Error_UnknownCommand: Неизвестная команда
+Error_YmlRead: 'Не удаётся прочитать config.yml, пожалуйста, убедитесь в отсутствии
+  ошибок (правильные отступы, использование кавычек: '' '' и тд.)'
+
+# Etc
+Etc_Barrel: Бочка
+Etc_LandsFlag_Description: '&r&7Позволяет открывать\n&r&7бочки BreweryX.'
+Etc_LandsFlag_Title: Доступ к бочкам
+Etc_NewRelease: '&rДоступно новое обновление BreweryX! &2&v1 &r-> &2&v2&r Ссылка&7:
+  &2&v3'
+Etc_Page: Страница
+Etc_SealingTable: Стол закупорки напитков.
+Etc_Usage: 'Использование:'
+
+# Help
+Help_Age: '&6/brew age <Тип дерева> <Лет> &9Настаивает зелье в вашей руке'
+Help_Configname: '&6/brew ItemName &9Показывает название предмета в руке для конфига'
+Help_Copy: '&6/brew copy [Количество]&9 Копирует напиток в твоей руке'
+Help_Create: '&6/brew create <Напиток> [Качество] [Игрок] &9Создаёт напиток с определённым
+  качеством (1-10)'
+Help_Delete: '&6/brew delete &9Удаляет напиток в твоей руке'
+Help_Distill: '&6/brew distill [Кол-во циклов] &9Дистиллирует зелье в вашей руке'
+Help_Drink: '&6/brew drink <Напиток> [Качество] [Игрок] &9Симулирует, будто [Игрок]
+  выпил Напиток'
+Help_Give: '&6/brew give <Напиток> [Качество] [Игрок] &9Синоним для /brew create'
+Help_Help: '&6/brew help [Страница] &9Показывает определённую страницу помощи'
+Help_Info: '&6/brew info&9 Показывает твоё текущее опьянение и качество'
+Help_InfoOther: '&6/brew info [Игрок]&9 показывает текущее опьянение и качество [Player]'
+Help_Puke: '&6/brew puke [Игрок] [Время] &9Заставляет Игрока сблевать'
+Help_Reload: '&6/brew reload &9Перезагружает конфиг'
+Help_Seal: '&6/brew seal &9Закупоривает напиток для продажи'
+Help_Set: '&6/brew set <игрок> <Опьянение> [Качество] &9Даёт опьянение (и качество)
+  игроку'
+Help_Simulate: '&6/brew simulate <Параметры...> [Ингредиенты...] &9Симулировать создание
+  напитка с параметрами'
+Help_Simulate_Age: '&6-a/--age <Тип дерева> <Кол-во лет>'
+Help_Simulate_Brewer: '&6-b/--brewer <Ник сварившего>'
+Help_Simulate_Cook: '&6-c/--cook <Время варки>'
+Help_Simulate_Distill: '&6-d/--distill <Кол-во дистилляций>'
+Help_Simulate_Options: '&eПараметры:'
+Help_Simulate_Player: '&6-p/--player <Игрок>'
+Help_Simulate_Recipe: '&6-r/--recipe <Готовый рецепт>'
+Help_Static: '&6/brew static &9 Сделать напиток статичным -> Не сможет больше настаиваться
+  или дистиллироваться'
+Help_UnLabel: '&6/brew unlabel &9Скрывает некоторые детали описания напитка'
+Help_Wakeup: '&6/brew wakeup list <Страница>&9 Список всех точек пробуждения'
+Help_WakeupAdd: '&6/brew wakeup add &9Добавляет точку пробуждения'
+Help_WakeupCheck: '&6/brew wakeup check &9Телепортируется на все точки пробуждения'
+Help_WakeupCheckSpecific: '&6/brew wakeup check <id> &9Телепортация в точку пробуждения
+  с айди <id>'
+Help_WakeupList: '&6/brew wakeup list <Страница> [Мир]&9 Список всех точек пробуждения
+  в [мире]'
+Help_WakeupRemove: '&6/brew wakeup remove <id> &9Удаление всех точек пробуждения с
+  айди <id>'
+
+# Perms
+Perms_NoBarrelCreate: '&cУ тебя нет прав на создание бочек!'
+Perms_NoBigBarrelCreate: '&cУ тебя нет прав на создание больших бочек!'
+Perms_NoCauldronFill: '&cУ тебя нет прав на пополнение бутылок из этого котла!'
+Perms_NoCauldronInsert: '&cУ тебя нет прав на добавление ингредиентов в котёл!'
+Perms_NoSmallBarrelCreate: '&cУ тебя нет прав на создание маленьких бочек!'
+
+# Player
+Player_BarrelCreated: Бочка создана
+Player_BarrelFull: '&cВ бочке нет места.'
+Player_CantDrink: Ты не можешь выпить больше.
+Player_CauldronInfo1: Котёл варит уже &v1 минут.
+Player_CauldronInfo2: Котёл только начал варить.
+Player_DrunkPassOut: Ты перепил и вырубился.
+Player_Drunkeness: 'Опьянение: '
+Player_Hangover: Твое похмелье
+Player_LoginDeny: Твой персонаж выпил слишком много и не может зайти на сервер!
+Player_LoginDenyLong: Твой персонаж перепил и вырубился. Попробуй через 10 минут!
+Player_ShopSealBrew: '&eНапиток должен быть запечатан перед продажей'
+Player_TriedToSay: '&v1 попытался сказать: &0&v2'
+Player_Wake: Охх! Я не помню, как оказался здесь...
+Player_WakeAlreadyDeleted: '&cТочка пробуждения с айди: &6&v1 &cуже была удалена!'
+Player_WakeCancel: '&6Проверка Точки Пробуждения была отменена'
+Player_WakeCreated: '&aТочка пробуждения под номером: &6&v1 &aуспешно создана!'
+Player_WakeDeleted: '&aТочка Пробуждения под номером: &6&v1 &aбыла удалена!'
+Player_WakeFilled: '&cТочка Пробуждения под номером: &6&v1&c в точку &6&v2 &v3, &v4,
+  &v5&c заполнена блоками!'
+Player_WakeHint1: 'Для следующей точки пробуждения: Ударь кулаком в воздух'
+Player_WakeHint2: 'Для отмены: &9/brew wakeup cancel'
+Player_WakeLast: '&aЭто была последняя точка пробуждения'
+Player_WakeNoCheck: '&cНет активных проверок Точек Пробуждения'
+Player_WakeNoPoints: '&cТочки Пробуждения отсутствуют!'
+Player_WakeNotExist: '&cТочка Пробуждения под номером: &6&v1 &cне существует!'
+Player_WakeTeleport: 'Телепорт на Точку Пробуждения под номером: &6&v1&f по координатам:
+  &6&v2 &v3, &v4, &v5'
+

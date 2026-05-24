@@ -1,0 +1,260 @@
+# !!! IMPORTANT: BreweryX configuration files do NOT support external comments! If you add any comments, they will be overwritten !!!
+# -- Ingredients in the Cauldron --
+# Which Ingredients are accepted by the Cauldron and the base potion resulting from them
+# You only need to add something here if you want to specify a custom name or color for the base potion
+
+# name: Name of the base potion coming out of the Cauldron (Formatting codes possible: such as &6)
+
+# ingredients: List of 'material/amount'
+#   With an item in your hand, use /brew ItemName to get its material for use in a recipe
+#   (Item-ids instead of material are not supported by bukkit anymore and will not work)
+#   A list of materials can be found here: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+
+# color: Color of the base potion from a cauldron. Defaults to CYAN
+#   Usable Colors: DARK_RED, RED, BRIGHT_RED, ORANGE, YELLOW, PINK, PURPLE, BLUE, CYAN, WATER, TEAL, OLIVE, GREEN, LIME, BLACK, GREY, BRIGHT_GREY, WHITE
+#   Or RGB colors (hex: for example '99FF33') (with '') (search for "HTML color" on the internet)
+
+# cookParticles:
+#   Color of the Particles above the cauldron at different cooking-times
+#   Color and minute during which each color should appear, i.e. one color at 8 minutes fading to another at 18 minutes.
+#   As List, each Color as name or RGB, see above. Written as 'Color/Minute'
+#   It will fade to the last color in the end, if there is only one color in the list, it will fade to grey
+
+# lore: List of additional text on the base potion. (Formatting codes possible: such as &6 or hex as #&<hex>)
+
+# customModelData: Custom Model Data Tag. This is a number that can be used to add custom textures to the item.
+cauldron:
+  ex:
+    name: Example
+    ingredients:
+    - BEDROCK/2
+    - DIAMOND
+    color: BLACK
+    cookParticles:
+    - RED/5
+    - WHITE/10
+    - 800000/25
+    lore:
+    - An example for a Base Potion
+    - This is how it comes out of a Cauldron
+    customModelData: 545
+  wheat:
+    name: Fermented wheat
+    ingredients:
+    - WHEAT
+    cookParticles:
+    - 2d8686/8
+  sugarcane:
+    name: Sugar brew
+    ingredients:
+    - SUGAR_CANE
+    color: f1ffad
+    cookParticles:
+    - f1ffad/4
+    - 858547/10
+  sugar:
+    name: Sugarwater
+    ingredients:
+    - SUGAR
+    cookParticles:
+    - WHITE/4
+    - BRIGHT_GREY/25
+  apple:
+    name: Apple must
+    ingredients:
+    - APPLE
+  berries:
+    name: Grape must
+    ingredients:
+    - SWEET_BERRIES
+    color: RED
+    cookParticles:
+    - ff6666/2
+    - RED/7
+    - ac6553/13
+  potato:
+    name: Potatomash
+    ingredients:
+    - POTATO
+  grass:
+    name: Boiled herbs
+    ingredients:
+    - SHORT_GRASS
+    color: 99ff66
+    cookParticles:
+    - GREEN/2
+    - 99ff99/20
+  rmushroom:
+    name: Mushroom brew
+    ingredients:
+    - RED_MUSHROOM
+    color: ff5c33
+    cookParticles:
+    - fab09e/15
+  bmushroom:
+    name: Mushroom brew
+    ingredients:
+    - BROWN_MUSHROOM
+    color: c68c53
+    cookParticles:
+    - c68c53/15
+  cocoa:
+    name: Chocolately brew
+    ingredients:
+    - COCOA_BEANS
+    color: '804600'
+    cookParticles:
+    - a26011/1
+    - 5c370a/3
+    - 4d4133/8
+  milk:
+    name: Milky water
+    ingredients:
+    - MILK_BUCKET
+    color: BRIGHT_GREY
+    cookParticles:
+    - fbfbd0/1
+    - WHITE/6
+  bl_flow:
+    name: Blueish brew
+    ingredients:
+    - blue-flowers
+    color: 0099ff
+    cookParticles:
+    - 0099ff
+  cactus:
+    name: Agave brew
+    ingredients:
+    - CACTUS
+    color: 00b300
+    cookParticles:
+    - 00b300/16
+  poi_potato:
+    name: Poisonous Broth
+    ingredients:
+    - POISONOUS_POTATO
+  egg:
+    name: Sticky brew
+    ingredients:
+    - EGG
+  oak_sapling:
+    name: Stringy herb broth
+    ingredients:
+    - OAK_SAPLING
+  vine:
+    name: Boiled herbs
+    ingredients:
+    - VINE
+    color: 99ff66
+    cookParticles:
+    - GREEN/2
+    - 99ff99/20
+  rot_flesh:
+    name: Foul pest
+    ingredients:
+    - ROTTEN_FLESH
+    color: '263300'
+    cookParticles:
+    - 263300/8
+    - BLACK/20
+  melon:
+    name: Melon juice
+    ingredients:
+    - MELON_SLICE
+  wheat_seeds:
+    name: Bitter brew
+    ingredients:
+    - WHEAT_SEEDS
+  melon_seeds:
+    name: Bitter brew
+    ingredients:
+    - MELON_SEEDS
+  pumpkin_seeds:
+    name: Bitter brew
+    ingredients:
+    - PUMPKIN_SEEDS
+  bone_meal:
+    name: Bony Brew
+    ingredients:
+    - BONE_MEAL
+    color: BRIGHT_GREY
+  cookie:
+    name: Chocolately sap
+    ingredients:
+    - COOKIE
+    color: '804600'
+    cookParticles:
+    - a26011/1
+    - 5c370a/3
+    - 4d4133/8
+  fer_spid_eye:
+    name: Fermented Eye
+    ingredients:
+    - FERMENTED_SPIDER_EYE
+  ghast_tear:
+    name: Sad brew
+    ingredients:
+    - GHAST_TEAR
+  snowball:
+    name: Icewater
+    ingredients:
+    - SNOWBALL
+  Gold_Nugget:
+    name: Glistering brew
+    ingredients:
+    - GOLD_NUGGET
+    color: ffd11a
+    cookParticles:
+    - ffd11a
+  glowstone_dust:
+    name: Glowing brew
+    ingredients:
+    - GLOWSTONE_DUST
+    color: ffff33
+    cookParticles:
+    - ffff99/3
+    - d9d926/15
+  applemead_base:
+    name: Apple-Sugar brew
+    ingredients:
+    - SUGAR_CANE/3
+    - APPLE
+    color: e1ff4d
+    cookParticles:
+    - e1ff4d/4
+  poi_grass:
+    name: Boiled acidy herbs
+    ingredients:
+    - SHORT_GRASS
+    - POISONOUS_POTATO
+    color: 99ff66
+    cookParticles:
+    - GREEN/2
+    - 99ff99/20
+  juniper:
+    name: Juniper brew
+    ingredients:
+    - blue-flowers
+    - WHEAT
+    color: 00ccff
+    cookParticles:
+    - 00ccff/8
+  gin_base:
+    name: Fruity juniper brew
+    ingredients:
+    - blue-flowers
+    - WHEAT
+    - APPLE
+    color: 66e0ff
+    cookParticles:
+    - 00ccff/5
+  eggnog_base:
+    name: Smooth egg mixture
+    ingredients:
+    - EGG
+    - SUGAR
+    - MILK_BUCKET
+    color: ffecb3
+    cookParticles:
+    - ffecb3/2
+

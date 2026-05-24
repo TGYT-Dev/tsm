@@ -1,0 +1,3 @@
+secret: "80b7339e2cf4036f672e34e7623268d459f6a54d3d049644c43aebde71561c2c"
+http-port: 4001
+websocket-port: 4002

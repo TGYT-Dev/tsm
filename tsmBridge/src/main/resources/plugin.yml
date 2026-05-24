@@ -1,0 +1,6 @@
+name: TSMBridge
+version: 1.0.0
+main: dev.tsm.tsmbridge.TSMBridge
+api-version: '1.21'
+description: TSM management bridge - exposes HTTP/WS API for the TSM web UI
+authors: [tsm]
