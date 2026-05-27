@@ -333,7 +333,7 @@ static int parse_sections(NBTReader *r, Section sections[], int *nsections) {
                                         }
                                     }
                                     if (pi < MAX_PALETTE)
-                                        strncpy(sec->names[pi], block_name, 127);
+                                        snprintf(sec->names[pi], sizeof(sec->names[pi]), "%s", block_name);
                                 }
                             } else if (bt == 12 && strcmp(bn, "data") == 0) {
                                 int32_t dl;
@@ -393,22 +393,13 @@ static void get_top_blocks(Section sections[], int nsections, uint8_t out_r[16][
                 if (done[bx][bz]) continue;
                 for (int by = 15; by >= 0; by--) {
                     int block_idx = by * 256 + bz * 16 + bx;
-                    int long_idx  = (block_idx * bpe) / 64;
-                    int bit_off   = (block_idx * bpe) % 64;
+                    int blocks_per_long = 64 / bpe;
+                    int long_idx  = block_idx / blocks_per_long;
+                    int bit_off   = (block_idx % blocks_per_long) * bpe;
 
                     if (long_idx >= sec->data_len) continue;
 
-                    int palette_idx;
-                    if (bit_off + bpe <= 64) {
-                        palette_idx = (int)((sec->data[long_idx] >> bit_off) & mask);
-                    } else {
-                        /* Spans two longs */
-                        if (long_idx + 1 >= sec->data_len) continue;
-                        int bits_in_first = 64 - bit_off;
-                        int64_t lo = (sec->data[long_idx]     >> bit_off) & ((1LL << bits_in_first) - 1);
-                        int64_t hi = (sec->data[long_idx + 1] & ((1LL << (bpe - bits_in_first)) - 1)) << bits_in_first;
-                        palette_idx = (int)(lo | hi);
-                    }
+                    int palette_idx = (int)((sec->data[long_idx] >> bit_off) & mask);
 
                     if (palette_idx < 0 || palette_idx >= sec->count) continue;
 

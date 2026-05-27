@@ -120,7 +120,38 @@ const BLOCK_COLORS = {
 };
 
 const DEFAULT_COLOR = [100, 100, 100];
-const AIR_BLOCKS    = new Set(['air','cave_air','void_air','barrier','structure_void']);
+const AIR_AND_TRANSPARENT = new Set([
+    'air', 'cave_air', 'void_air', 'barrier', 'structure_void',
+    'wheat', 'carrots', 'potatoes', 'beetroots', 'melon_stem', 'pumpkin_stem',
+    'attached_melon_stem', 'attached_pumpkin_stem', 'sweet_berry_bush',
+    'tall_grass', 'grass', 'fern', 'large_fern', 'dead_bush', 'seagrass',
+    'dandelion', 'poppy', 'blue_orchid', 'allium', 'azure_bluet',
+    'red_tulip', 'orange_tulip', 'white_tulip', 'pink_tulip',
+    'oxeye_daisy', 'cornflower', 'lily_of_the_valley', 'sunflower',
+    'lilac', 'rose_bush', 'peony', 'sugar_cane', 'bamboo', 'vines',
+    'redstone_wire', 'string', 'tripwire', 'glow_lichen'
+]);
+
+function isAirOrTransparent(blockName) {
+    const name = blockName.replace('minecraft:', '');
+    if (AIR_AND_TRANSPARENT.has(name)) return true;
+    
+    // Match common naming patterns for transparent decorations
+    if (name.includes('sapling') || 
+        name.includes('torch') || 
+        name.includes('sign') || 
+        name.includes('rail') || 
+        name.includes('button') || 
+        name.includes('pressure_plate') ||
+        name.includes('flower') ||
+        name.includes('banner') ||
+        name.includes('lantern') ||
+        name.includes('candle') ||
+        name.includes('carpet')) {
+        return true;
+    }
+    return false;
+}
 
 function getBlockColor(blockName) {
     const name = blockName.replace('minecraft:', '');
@@ -163,35 +194,59 @@ async function parseRegion(regionPath) {
 }
 
 function getTopBlocks(chunkNbt) {
-    // Returns 16x16 array of [r,g,b] for top blocks
+    // Returns 16x16 array of [r,g,b] for top blocks and 16x16 height map
     const colors = Array.from({ length: 16 }, () => Array(16).fill(DEFAULT_COLOR));
+    const heights = Array.from({ length: 16 }, () => Array(16).fill(64));
+    const byY = {};
+    let sortedYs = [];
+
     try {
         const sections = chunkNbt.value?.sections?.value?.value || [];
-        const byY = {};
         for (const section of sections) {
             const y = section.Y?.value ?? section.y?.value;
             if (y !== undefined) byY[y] = section;
         }
+        sortedYs = Object.keys(byY).map(Number).sort((a, b) => b - a);
+    } catch (e) {
+        return { colors, heights };
+    }
 
-        const sortedYs = Object.keys(byY).map(Number).sort((a, b) => b - a);
-
+    try {
         for (let bx = 0; bx < 16; bx++) {
             for (let bz = 0; bz < 16; bz++) {
                 let found = false;
                 for (const sectionY of sortedYs) {
                     if (found) break;
                     const section = byY[sectionY];
+                    if (!section) continue;
+
                     const palette = section.block_states?.value?.palette?.value?.value || section.Palette?.value?.value;
                     const data    = section.block_states?.value?.data?.value || section.BlockStates?.value;
-                    if (!palette || !data) continue;
+                    if (!palette) continue;
+
+                    if (!data) {
+                        // In 1.18+, if palette has items but data is missing, the entire section is filled with the single block in the palette
+                        if (palette.length > 0) {
+                            const block = palette[0];
+                            const blockName = block?.Name?.value || 'minecraft:air';
+                            if (!isAirOrTransparent(blockName)) {
+                                colors[bx][bz] = getBlockColor(blockName);
+                                heights[bx][bz] = sectionY * 16 + 15;
+                                found = true;
+                                break;
+                            }
+                        }
+                        continue;
+                    }
 
                     const bitsPerEntry = Math.max(4, Math.ceil(Math.log2(palette.length)));
                     const mask = (1n << BigInt(bitsPerEntry)) - 1n;
 
+                    const blocksPerLong = Math.floor(64 / bitsPerEntry);
                     for (let by = 15; by >= 0; by--) {
                         const blockIndex = by * 256 + bz * 16 + bx;
-                        const longIndex  = Math.floor(blockIndex * bitsPerEntry / 64);
-                        const bitOffset  = BigInt(blockIndex * bitsPerEntry % 64);
+                        const longIndex  = Math.floor(blockIndex / blocksPerLong);
+                        const bitOffset  = BigInt((blockIndex % blocksPerLong) * bitsPerEntry);
                         if (longIndex >= data.length) continue;
 
                         const longVal     = BigInt(data[longIndex]);
@@ -199,8 +254,9 @@ function getTopBlocks(chunkNbt) {
                         const block       = palette[paletteIdx];
                         const blockName   = block?.Name?.value || 'air';
 
-                        if (!AIR_BLOCKS.has(blockName.replace('minecraft:', ''))) {
+                        if (!isAirOrTransparent(blockName)) {
                             colors[bx][bz] = getBlockColor(blockName);
+                            heights[bx][bz] = sectionY * 16 + by;
                             found = true;
                             break;
                         }
@@ -208,8 +264,8 @@ function getTopBlocks(chunkNbt) {
                 }
             }
         }
-    } catch {}
-    return colors;
+    } catch (e) {}
+    return { colors, heights };
 }
 
 // ── Main render function ──────────────────────────────────────────────────────
@@ -242,7 +298,7 @@ async function renderWorld(worldPath, centerX, centerZ, radius) {
             try {
                 const chunks = await parseRegion(regionFile);
                 for (const { cx, cz, nbt: chunkNbt } of chunks) {
-                    const colors = getTopBlocks(chunkNbt);
+                    const { colors, heights } = getTopBlocks(chunkNbt);
                     const globalCX = rx * 32 + cx;
                     const globalCZ = rz * 32 + cz;
                     const pixStartX = (globalCX - (centerRX - regionRadius) * 32) * 16;
@@ -254,7 +310,22 @@ async function renderWorld(worldPath, centerX, centerZ, radius) {
                             const pz = pixStartZ + bz;
                             if (px < 0 || pz < 0 || px >= pixelsPerSide || pz >= pixelsPerSide) continue;
                             const idx = (pz * pixelsPerSide + px) * 4;
-                            const [r, g, b] = colors[bx][bz];
+                            
+                            const h = heights[bx][bz];
+                            let dy = 0;
+                            if (bx > 0 && bz > 0) {
+                                dy = h - heights[bx - 1][bz - 1];
+                            } else if (bx > 0) {
+                                dy = h - heights[bx - 1][bz];
+                            } else if (bz > 0) {
+                                dy = h - heights[bx][bz - 1];
+                            }
+                            
+                            const factor = 1 + Math.max(-0.25, Math.min(0.25, dy * 0.04));
+                            const r = Math.max(0, Math.min(255, Math.round(colors[bx][bz][0] * factor)));
+                            const g = Math.max(0, Math.min(255, Math.round(colors[bx][bz][1] * factor)));
+                            const b = Math.max(0, Math.min(255, Math.round(colors[bx][bz][2] * factor)));
+
                             png.data[idx]     = r;
                             png.data[idx + 1] = g;
                             png.data[idx + 2] = b;
@@ -275,4 +346,86 @@ async function renderWorld(worldPath, centerX, centerZ, radius) {
     });
 }
 
-module.exports = { renderWorld };
+const regionCache = new Map(); // regionPath -> { mtimeMs, chunks }
+
+async function parseRegionCached(regionPath) {
+    try {
+        const st = fs.statSync(regionPath);
+        const mtime = st.mtimeMs;
+        const cached = regionCache.get(regionPath);
+        if (cached && cached.mtime === mtime) return cached.chunks;
+        const chunks = await parseRegion(regionPath);
+        regionCache.set(regionPath, { mtime, chunks });
+        // simple LRU eviction: keep size <= 16
+        if (regionCache.size > 16) {
+            const firstKey = regionCache.keys().next().value;
+            regionCache.delete(firstKey);
+        }
+        return chunks;
+    } catch (e) { return []; }
+}
+
+async function renderChunk(worldPath, globalCX, globalCZ) {
+    // Renders a single chunk as a 16x16 PNG buffer using cached region parsing
+    const regionDir = path.join(worldPath, 'region');
+    if (!fs.existsSync(regionDir)) return null;
+
+    const rx = Math.floor(globalCX / 32);
+    const rz = Math.floor(globalCZ / 32);
+    const localCX = ((globalCX % 32) + 32) % 32;
+    const localCZ = ((globalCZ % 32) + 32) % 32;
+
+    const regionFile = path.join(regionDir, `r.${rx}.${rz}.mca`);
+    if (!fs.existsSync(regionFile)) return null;
+
+    const chunks = await parseRegionCached(regionFile);
+    const found = chunks.find(c => c.cx === localCX && c.cz === localCZ);
+    if (!found) return null;
+
+    const { colors, heights } = getTopBlocks(found.nbt);
+    const png = new PNG({ width: 16, height: 16 });
+    for (let i = 0; i < 16 * 16; i++) {
+        png.data[i * 4 + 3] = 255;
+    }
+    for (let bx = 0; bx < 16; bx++) {
+        for (let bz = 0; bz < 16; bz++) {
+            const idx = (bz * 16 + bx) * 4;
+            const h = heights[bx][bz];
+            let dy = 0;
+            if (bx > 0 && bz > 0) {
+                dy = h - heights[bx - 1][bz - 1];
+            } else if (bx > 0) {
+                dy = h - heights[bx - 1][bz];
+            } else if (bz > 0) {
+                dy = h - heights[bx][bz - 1];
+            }
+
+            const factor = 1 + Math.max(-0.25, Math.min(0.25, dy * 0.04));
+            const r = Math.max(0, Math.min(255, Math.round(colors[bx][bz][0] * factor)));
+            const g = Math.max(0, Math.min(255, Math.round(colors[bx][bz][1] * factor)));
+            const b = Math.max(0, Math.min(255, Math.round(colors[bx][bz][2] * factor)));
+
+            png.data[idx] = r; png.data[idx+1] = g; png.data[idx+2] = b; png.data[idx+3] = 255;
+        }
+    }
+
+    return await new Promise((resolve, reject) => {
+        const chunks = [];
+        const stream = png.pack();
+        stream.on('data', d => chunks.push(d));
+        stream.on('end',  () => resolve(Buffer.concat(chunks)));
+        stream.on('error', reject);
+    });
+}
+
+async function renderChunkToFile(worldPath, globalCX, globalCZ, outPath) {
+    const buf = await renderChunk(worldPath, globalCX, globalCZ);
+    if (!buf) return null;
+    try {
+        fs.mkdirSync(path.dirname(outPath), { recursive: true });
+        fs.writeFileSync(outPath, buf);
+        return outPath;
+    } catch (e) { return null; }
+}
+
+module.exports = { renderWorld, renderChunk, renderChunkToFile };

@@ -8,6 +8,7 @@ latest.log
 # Backups and worlds
 backups/
 tsM_backups/
+tsmMcServer/
 tsmMcServer/world/
 tsmMcServer/world_nether/
 tsmMcServer/world_the_end/

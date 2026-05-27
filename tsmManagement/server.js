@@ -22,6 +22,7 @@ const path      = require('path');
 const os        = require('os');
 const archiver  = require('archiver');
 
+
 // ── Config ────────────────────────────────────────────────────────────────────
 const CONFIG_PATH = path.resolve(os.homedir(), 'projects/tsm/config.json');
 const getConfig   = () => JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
@@ -106,7 +107,26 @@ const connectBridge = () => {
             const msg = JSON.parse(raw.toString());
             switch (msg.type) {
                 case 'tps':
-                    broadcast({ type: 'stats', tps: msg.tps1m, tps5m: msg.tps5m, tps15m: msg.tps15m, online: msg.online, max: msg.max });
+                    let cpu = 0;
+                    let ram = 0;
+                    try {
+                        const pid = execSync('pgrep -f "paper.*jar"').toString().trim().split('\n')[0];
+                        if (pid) {
+                            const raw = execSync(`ps -p ${pid} -o %cpu,%mem --no-headers`).toString().trim().split(/\s+/);
+                            cpu = parseFloat(raw[0]) || 0;
+                            ram = parseFloat(raw[1]) || 0;
+                        }
+                    } catch {}
+                    broadcast({ 
+                        type: 'stats', 
+                        tps: msg.tps1m, 
+                        tps5m: msg.tps5m, 
+                        tps15m: msg.tps15m, 
+                        online: msg.online, 
+                        max: msg.max,
+                        cpu,
+                        ram
+                    });
                     break;
                 case 'join':
                     broadcast({ type: 'playerUpdate' });
@@ -220,6 +240,11 @@ wss.on('connection', (ws) => {
         if (ws.readyState === WebSocket.OPEN)
             ws.send(JSON.stringify({ type: 'log', line: e.line, category: e.category }));
     });
+});
+
+app.get('/api/debug-log', (req, res) => {
+    console.log('[BROWSER DEBUG]', req.query.msg);
+    res.json({ ok: true });
 });
 
 // ── API: Status ───────────────────────────────────────────────────────────────
@@ -406,11 +431,12 @@ app.post('/api/config', (req, res) => {
 
 // ── API: Map render (uses C renderer) ────────────────────────────────────────
 const { execFile } = require('child_process');
+const { renderChunkToFile } = require('./chunkRenderer');
 
 const WORLD_DIRS = {
-    world:         path.join(SERVER_DIR, 'world'),
-    world_nether:  path.join(SERVER_DIR, 'world_nether'),
-    world_the_end: path.join(SERVER_DIR, 'world_the_end'),
+    world:         path.join(SERVER_DIR, 'world/dimensions/minecraft/overworld'),
+    world_nether:  path.join(SERVER_DIR, 'world/dimensions/minecraft/the_nether'),
+    world_the_end: path.join(SERVER_DIR, 'world/dimensions/minecraft/the_end'),
 };
 
 const MAP_FILES_DIR  = path.join(TSM_ROOT, 'tsmManagement', 'mapFiles');
@@ -420,6 +446,97 @@ const mapCacheMeta   = {}; // cacheKey -> { file, ts }
 
 if (!fs.existsSync(MAP_FILES_DIR)) fs.mkdirSync(MAP_FILES_DIR, { recursive: true });
 
+// Map tiles cache directory
+const MAP_TILES_DIR = path.join(TSM_ROOT, 'tsmManagement', 'mapTiles');
+if (!fs.existsSync(MAP_TILES_DIR)) fs.mkdirSync(MAP_TILES_DIR, { recursive: true });
+
+// In-flight render promises to deduplicate concurrent requests
+const tileInflight = new Map();
+// Regions queued for background pre-render
+const regionQueue = new Set();
+
+async function preRenderRegion(worldDir, rx, rz) {
+    const key = `${worldDir}:${rx}:${rz}`;
+    if (regionQueue.has(key)) return;
+    regionQueue.add(key);
+    // render all 32x32 chunks in region with limited concurrency
+    const tasks = [];
+    for (let cx = 0; cx < 32; cx++) for (let cz = 0; cz < 32; cz++) tasks.push({cx: rx*32 + cx, cz: rz*32 + cz});
+    const CONCURRENCY = 4;
+    let i = 0;
+    async function worker(){
+        while (i < tasks.length) {
+            const t = tasks[i++];
+            const tilePath = path.join(MAP_TILES_DIR, path.basename(worldDir), `${t.cx}_${t.cz}.png`);
+            if (fs.existsSync(tilePath)) continue;
+            try { await renderChunkToFile(worldDir, t.cx, t.cz, tilePath); } catch(e){}
+        }
+    }
+    const workers = Array.from({length: CONCURRENCY}, () => worker());
+    await Promise.all(workers);
+    regionQueue.delete(key);
+}
+
+
+// ── API: Map chunk render (on-demand tile cache + background pre-render)
+app.get('/api/map/chunk', async (req, res) => {
+    const world = req.query.world || 'world';
+    const cx    = parseInt(req.query.cx);
+    const cz    = parseInt(req.query.cz);
+    if (Number.isNaN(cx) || Number.isNaN(cz)) return res.status(400).json({ error: 'Missing cx/cz' });
+    const worldDir = WORLD_DIRS[world];
+    if (!worldDir || !fs.existsSync(worldDir)) return res.status(404).json({ error: 'World not found' });
+
+    try {
+        const tileDir = path.join(MAP_TILES_DIR, world.replace(/[^a-zA-Z0-9-_]/g, '_'));
+        const tilePath = path.join(tileDir, `${cx}_${cz}.png`);
+        // Region file mtime to detect stale tiles
+        const rx = Math.floor(cx/32), rz = Math.floor(cz/32);
+        const regionFile = path.join(worldDir, 'region', `r.${rx}.${rz}.mca`);
+        const regionMtime = fs.existsSync(regionFile) ? fs.statSync(regionFile).mtimeMs : 0;
+
+        if (fs.existsSync(tilePath)) {
+            const s = fs.statSync(tilePath);
+            if (s.mtimeMs >= regionMtime) {
+                res.set('Content-Type', 'image/png');
+                res.set('Cache-Control', 'public, max-age=86400');
+                res.set('ETag', `"${s.size}-${s.mtimeMs}"`);
+                return res.sendFile(tilePath);
+            }
+        }
+
+        // Deduplicate inflight renders
+        if (!tileInflight.has(tilePath)) {
+            const p = (async () => {
+                try {
+                    fs.mkdirSync(path.dirname(tilePath), { recursive: true });
+                    // Try to render to file (faster overall since we can reuse)
+                    const out = await renderChunkToFile(worldDir, cx, cz, tilePath);
+                    return out || null;
+                } catch (e) { return null; }
+            })();
+            tileInflight.set(tilePath, p);
+            p.finally(() => tileInflight.delete(tilePath));
+        }
+
+        const made = await tileInflight.get(tilePath);
+        if (!made || !fs.existsSync(made)) return res.status(404).json({ error: 'Chunk not found' });
+
+        // Schedule background pre-render of entire region (async)
+        preRenderRegion(worldDir, rx, rz).catch(() => {});
+
+        const s2 = fs.statSync(made);
+        res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'public, max-age=86400');
+        res.set('ETag', `"${s2.size}-${s2.mtimeMs}"`);
+        return res.sendFile(made);
+    } catch (e) {
+        console.error('map chunk error', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ── API: Map render (full image, kept for compatibility)
 app.get('/api/map', async (req, res) => {
     const world  = req.query.world  || 'world';
     const cx     = parseInt(req.query.cx)     || 0;
@@ -459,6 +576,74 @@ app.get('/api/map', async (req, res) => {
     mapCacheMeta[cacheKey] = { file: outFile, ts: Date.now() };
     res.set('Content-Type', 'image/png');
     res.sendFile(outFile);
+});
+
+// ── API: Map render statistics (calculates rendered chunks / total generated chunks in region files) ──
+const generatedCountCache = new Map(); // world -> { count, ts }
+
+function countGeneratedChunks(worldDir) {
+    const regionDir = path.join(worldDir, 'region');
+    if (!fs.existsSync(regionDir)) return 0;
+    try {
+        const files = fs.readdirSync(regionDir).filter(f => f.endsWith('.mca'));
+        let totalGenerated = 0;
+        for (const file of files) {
+            const filePath = path.join(regionDir, file);
+            try {
+                const fd = fs.openSync(filePath, 'r');
+                const buf = Buffer.alloc(4096);
+                fs.readSync(fd, buf, 0, 4096, 0);
+                fs.closeSync(fd);
+                for (let i = 0; i < 1024; i++) {
+                    const offset = buf.readUInt32BE(i * 4);
+                    if (offset !== 0) {
+                        totalGenerated++;
+                    }
+                }
+            } catch (e) {}
+        }
+        return totalGenerated;
+    } catch (e) {
+        return 0;
+    }
+}
+
+function getGeneratedChunksCount(world) {
+    const worldDir = WORLD_DIRS[world];
+    if (!worldDir || !fs.existsSync(worldDir)) return 0;
+    const cached = generatedCountCache.get(world);
+    if (cached && Date.now() - cached.ts < 15000) { // cache for 15 seconds
+        return cached.count;
+    }
+    const count = countGeneratedChunks(worldDir);
+    generatedCountCache.set(world, { count, ts: Date.now() });
+    return count;
+}
+
+app.get('/api/map/render-stats', (req, res) => {
+    const world = req.query.world || 'world';
+    const worldDir = WORLD_DIRS[world];
+    if (!worldDir || !fs.existsSync(worldDir)) {
+        return res.status(404).json({ error: 'World not found' });
+    }
+
+    try {
+        const totalGenerated = getGeneratedChunksCount(world);
+        const tileDir = path.join(MAP_TILES_DIR, world.replace(/[^a-zA-Z0-9-_]/g, '_'));
+        let renderedCount = 0;
+        if (fs.existsSync(tileDir)) {
+            const files = fs.readdirSync(tileDir);
+            renderedCount = files.filter(f => f.endsWith('.png')).length;
+        }
+
+        res.json({
+            rendered: renderedCount,
+            generated: totalGenerated,
+            percent: totalGenerated > 0 ? Math.round((renderedCount / totalGenerated) * 100) : 0
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────

@@ -451,6 +451,23 @@ recipes:
     effects:
     - REGENERATION/30
     - SPEED/10
+  mayonutellaSandwich:
+    name: Blended Mayo and Nutella Sandwich
+    ingredients:
+    - LEAF_LITTER/7
+    - MILK_BUCKET/3
+    cookingtime: 13
+    distillruns: 1
+    distilltime: 40
+    wood: 3
+    age: 2
+    color: WHITE
+    difficulty: 1
+    alcohol: 99
+    customModelData: '5001'
+    effects:
+    - WITHER/200/100
+    - BLINDNESS/200/100
 
 # More recipe ideas:
 # Dandelion Liquor
